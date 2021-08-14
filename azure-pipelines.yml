@@ -4,19 +4,28 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
 
 trigger:
-- login
+- main
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: vs2017-win2016
 
 steps:
+
 - task: Maven@3
   inputs:
     mavenPomFile: 'pom.xml'
     mavenOptions: '-Xmx3072m'
     javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.11'
+    jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
     goals: 'package'
+- task: CopyFiles@2
+  inputs:
+    targetFolder: '$(Build.ArtifactStagingDirectory)'    
+
+- task: PublishBuildArtifacts@1    
+  displayName: 'Publish Artifact: drop'
+  inputs:
+    PathtoPublish: '$(build.artifactstagingdirectory)'
