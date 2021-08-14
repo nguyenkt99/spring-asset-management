@@ -4,5 +4,6 @@ public enum AssignmentState {
     ACCEPTED,
     WAITING_FOR_ACCEPTANCE,
     WAITING_FOR_RETURNING,
-    COMPLETED
+    COMPLETED,
+    CANCELED_ASSIGN,
 }

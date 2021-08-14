@@ -2,6 +2,7 @@ package com.nashtech.AssetManagement_backend.service.Impl;
 
 import com.nashtech.AssetManagement_backend.dto.CategoryDTO;
 import com.nashtech.AssetManagement_backend.entity.CategoryEntity;
+import com.nashtech.AssetManagement_backend.exception.BadRequestException;
 import com.nashtech.AssetManagement_backend.exception.ConflictException;
 import com.nashtech.AssetManagement_backend.repository.CategoryRepository;
 import com.nashtech.AssetManagement_backend.service.CategoryService;
@@ -30,16 +31,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDTO create(CategoryDTO dto) {
-//        if (categoryRepo.existsByPrefixOrName(dto.getPrefix(), dto.getName()))
-//            throw new ConflictException(EXIST_CATEGORY_ERROR);
-        String strErr= "";
         if (categoryRepo.getByName(dto.getName()) != null)
-            strErr += EXIST_NAME_CATEGORY_ERROR;
-        if (categoryRepo.getByPrefix(dto.getPrefix())!=null)
-            strErr += EXIST_PREFIX_CATEGORY_ERROR;
-        if(strErr.equals("")==false){
-            throw new ConflictException(strErr);
-        }
+            throw new ConflictException(EXIST_NAME_CATEGORY_ERROR);
+        if (categoryRepo.getByPrefix(dto.getPrefix()) != null)
+            throw new BadRequestException(EXIST_PREFIX_CATEGORY_ERROR);
         CategoryEntity cate = CategoryDTO.toEntity(dto);
         return CategoryDTO.toDTO(categoryRepo.save(cate));
     }

@@ -83,14 +83,17 @@ public class UsersEntity {
     @JoinColumn(name="role_id")
     private RolesEntity role;
 
-    @OneToMany(mappedBy = "userAssignTo")
-    private List<AssignmentEntity> assignmentEntityTos = new ArrayList<>();
+    @OneToMany(mappedBy = "assignTo")
+    private List<AssignmentEntity> assignmentTos = new ArrayList<>();
 
-    @OneToMany(mappedBy = "userAssignBy")
-    private List<AssignmentEntity> assignmentEntityBIES = new ArrayList<>();
+    @OneToMany(mappedBy = "assignBy")
+    private List<AssignmentEntity> assignmentsBys = new ArrayList<>();
 
-    @OneToMany(mappedBy = "userAccept")
-    private List<AssignmentEntity> assignmentEntityAccepts = new ArrayList<>();
+    @OneToMany(mappedBy = "requestBy")
+    private List<RequestEntity> requestBys = new ArrayList<>();
+
+    @OneToMany(mappedBy = "acceptBy")
+    private List<RequestEntity> acceptBys = new ArrayList<>();
 
     @NotNull
     @Enumerated(EnumType.STRING)

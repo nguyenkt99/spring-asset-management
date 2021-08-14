@@ -1,6 +1,7 @@
 package com.nashtech.AssetManagement_backend.security;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import com.nashtech.AssetManagement_backend.security.jwt.JwtAuthEntryPoint;
 import com.nashtech.AssetManagement_backend.security.jwt.JwtAuthTokenFilter;
@@ -83,9 +84,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
-
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Collections.singletonList("*"));
+        configuration.setAllowedHeaders(Collections.singletonList("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", new CorsConfiguration().applyPermitDefaultValues());
+        source.registerCorsConfiguration("/**",configuration);
         return source;
     }
 

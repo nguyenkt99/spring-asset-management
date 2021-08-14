@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,8 +37,9 @@ public class AssetController {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<AssetDTO>> getAll(){
-        List<AssetDTO> assetDTOs = assetService.findAll();
+    @ResponseBody
+    public ResponseEntity<List<AssetDTO>> getAll(Authentication authentication){
+        List<AssetDTO> assetDTOs = assetService.findAllByAdminLocation(authentication.getName());
         if (assetDTOs.isEmpty()){
             return new ResponseEntity<>(assetDTOs, HttpStatus.NO_CONTENT);
         }

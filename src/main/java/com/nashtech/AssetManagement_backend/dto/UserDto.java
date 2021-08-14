@@ -58,7 +58,6 @@ public class UserDto {
     @NotNull(message = "Role name can not be null")
     private RoleName type;
 
-    @NotNull(message = "User State can not be null")
     private UserState state ;
 
     public UserDto toDto(UsersEntity entity) {

@@ -8,7 +8,7 @@ import java.util.List;
 public interface AssetService {
     AssetDTO create(AssetDTO dto, String username);
 
-    List<AssetDTO> findAll();
+    List<AssetDTO> findAllByAdminLocation(String username);
 
     public AssetDTO findByAssetName(String assetName);
 

@@ -6,8 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
-
+import java.util.List;
 
 
 @Getter
@@ -29,27 +30,23 @@ public class AssignmentEntity {
     @Column(length = 60,name = "state")
     private AssignmentState state;
 
-    @Column(name = "assign_date")
-    private Date assignDate;
-
-    @Column(name = "accept_date")
-    private Date acceptDate;
+    @Column(name = "assigned_date")
+    private Date assignedDate;
 
     @ManyToOne
     @JoinColumn(name="asset_id")
     private AssetEntity assetEntity;
 
     @ManyToOne
-    @JoinColumn(name="user_id")
-    private UsersEntity userAssignTo;
+    @JoinColumn(name="assign_to")
+    private UsersEntity assignTo;
 
     @ManyToOne
     @JoinColumn(name="assign_by")
-    private UsersEntity userAssignBy;
+    private UsersEntity assignBy;
 
-    @ManyToOne
-    @JoinColumn(name="accept_by")
-    private UsersEntity userAccept;
-
+    @OneToMany(mappedBy = "assignmentEntity")
+    private List<RequestEntity> requests = new ArrayList<>();
 
 }
+

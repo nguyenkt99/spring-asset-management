@@ -148,14 +148,14 @@ public class UserServiceImpl implements UserService {
     public Boolean canDisableUser(String staffCode) {
         return !(userRepository.findByStaffCode(staffCode)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND))
-                .getAssignmentEntityTos().size()>0);
+                .getAssignmentsBys().size()>0);
     }
 
     @Override
     public Boolean disableUser(String staffCode) {
         UsersEntity usersEntity = userRepository.findByStaffCode(staffCode)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
-        if (usersEntity.getAssignmentEntityTos().size()>0){
+        if (usersEntity.getAssignmentTos().size()>0){
             throw new ConflictException(DISABLE_CONFLICT);
         }
         usersEntity.setState(UserState.Disabled);

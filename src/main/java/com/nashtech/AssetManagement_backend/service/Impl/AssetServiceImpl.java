@@ -16,11 +16,10 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 
 @Data
 @RequiredArgsConstructor
@@ -50,28 +49,35 @@ public class AssetServiceImpl implements AssetService {
         return AssetDTO.toDTO(assetRepo.save(asset));
     }
 
-    ///FIND ALL ASSETS
+    /// FIND ALL ASSETS
     @Override
-    public List<AssetDTO> findAll() {
-        return assetRepo.findAll().stream().map(AssetDTO::toDTO).collect(Collectors.toList());
+    public List<AssetDTO> findAllByAdminLocation(String username) {
+        Location location = userRepo.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_ERROR)).getLocation();
+        List<AssetDTO> AssetDTOs = assetRepo.findAll().stream().filter(p -> p.getLocation().equals(location))
+            .map(AssetDTO::toDTO).collect(Collectors.toList());
+        AssetDTOs.sort(Comparator.comparing(AssetDTO::getAssetCode));
+
+        return AssetDTOs;
     }
 
     @Override
     public AssetDTO findByAssetName(String assetName) throws ResourceNotFoundException {
-        AssetEntity assetEntity = assetRepo.findByAssetName(assetName).orElseThrow(() -> new ResourceNotFoundException("Asset is not found for this asset name:" + assetName));
+        AssetEntity assetEntity = assetRepo.findByAssetName(assetName).orElseThrow(
+                () -> new ResourceNotFoundException("Asset is not found for this asset name:" + assetName));
         return new AssetDTO().toDTO(assetEntity);
     }
 
     @Override
     public AssetDTO findbyId(String assetCode) throws ResourceNotFoundException {
-        AssetEntity assetEntity = assetRepo.findById(assetCode).orElseThrow(() -> new ResourceNotFoundException("Asset is not found for this asset code:" + assetCode));
+        AssetEntity assetEntity = assetRepo.findById(assetCode).orElseThrow(
+                () -> new ResourceNotFoundException("Asset is not found for this asset code:" + assetCode));
         return new AssetDTO().toDTO(assetEntity);
     }
 
     @Override
     public Boolean canDelete(String assetCode) {
-        return !(assetRepo.findById(assetCode)
-                .orElseThrow(() -> new ResourceNotFoundException(ASSET_NOT_FOUND_ERROR))
+        return !(assetRepo.findById(assetCode).orElseThrow(() -> new ResourceNotFoundException(ASSET_NOT_FOUND_ERROR))
                 .getAssignmentEntities().size() > 0);
     }
 
