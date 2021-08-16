@@ -11,7 +11,11 @@ import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
+
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Setter
 @Getter
@@ -32,6 +36,8 @@ public class AssetDTO {
     private String categoryPrefix;
     private String categoryName;
 
+    private List<AssignmentDTO> assignmentDTOs = new ArrayList<>();
+
     public static AssetDTO toDTO(AssetEntity asset){
         if (asset == null)
             return null;
@@ -44,6 +50,8 @@ public class AssetDTO {
         dto.setInstalledDate(asset.getInstalledDate());
         dto.setState(asset.getState());
         dto.setCategoryName(asset.getCategoryEntity().getName());
+        dto.setAssignmentDTOs(asset.getAssignmentEntities()
+            .stream().map(AssignmentDTO::toDTO).collect(Collectors.toList()));
         return dto;
     }
 

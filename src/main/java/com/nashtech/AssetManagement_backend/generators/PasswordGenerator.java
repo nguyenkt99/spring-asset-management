@@ -9,7 +9,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import javax.persistence.FlushModeType;
 import javax.persistence.Query;
 import java.text.SimpleDateFormat;
-import java.util.*;
 
 
 public class PasswordGenerator implements ValueGenerator<String> {

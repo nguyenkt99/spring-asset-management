@@ -1,6 +1,5 @@
 package com.nashtech.AssetManagement_backend.entity;
 
-import com.nashtech.AssetManagement_backend.generators.AssetCodeGenerator;
 import com.nashtech.AssetManagement_backend.generators.PasswordGenerator;
 import com.nashtech.AssetManagement_backend.generators.StaffCodeGenerator;
 import com.nashtech.AssetManagement_backend.generators.UsernameGenerator;

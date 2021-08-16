@@ -2,7 +2,6 @@ package com.nashtech.AssetManagement_backend.generators;
 
 
 import com.nashtech.AssetManagement_backend.entity.AssetEntity;
-import com.nashtech.AssetManagement_backend.entity.CategoryEntity;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
