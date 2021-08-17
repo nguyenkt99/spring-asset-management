@@ -82,7 +82,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> retrieveUsers(Location location) {
-        List<UsersEntity> usersEntities = userRepository.findAllByLocation(location);
+        UserState userState = null;
+        List<UsersEntity> usersEntities = userRepository.findAllByLocationAndState(location, userState.Enable);
         usersEntities = usersEntities.stream().sorted(Comparator.comparing(o -> (o.getFirstName() + ' ' + o.getLastName())))
                 .collect(Collectors.toList());
         return new UserDto().toListDto(usersEntities);

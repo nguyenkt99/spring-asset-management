@@ -3,6 +3,7 @@ package com.nashtech.AssetManagement_backend.repository;
 
 import com.nashtech.AssetManagement_backend.entity.Location;
 import com.nashtech.AssetManagement_backend.entity.RolesEntity;
+import com.nashtech.AssetManagement_backend.entity.UserState;
 import com.nashtech.AssetManagement_backend.entity.UsersEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -37,7 +38,7 @@ public interface UserRepository extends JpaRepository<UsersEntity, Long> {
 
     Boolean existsByUserName(String username);
 
-    List<UsersEntity> findAllByLocation(Location location);
+    List<UsersEntity> findAllByLocationAndState(Location location, UserState userState);
 
     List<UsersEntity> findAllByLocationOrderByFirstNameAscLastNameAsc(Location location);
 }
