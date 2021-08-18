@@ -65,7 +65,9 @@ public class UsersEntity {
     @Column(name = "joined_date")
 //    @CreationTimestamp
     private Date joinedDate;
-
+    @Column(name = "email")
+//    @CreationTimestamp
+    private String email;
     @Column(name = "created_date")
     @CreationTimestamp
     private Date createdDate;

@@ -50,6 +50,7 @@ public class UserDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private Date joinedDate;
 
+    private String email;
     // @NotNull(message = "location is not chosen")
     private Location location;
 
@@ -73,6 +74,7 @@ public class UserDto {
         dto.setStaffCode(entity.getStaffCode());
         dto.setUsername(entity.getUserName());
         dto.setFirstLogin(entity.isFirstLogin());
+        dto.setEmail(entity.getEmail());
         dto.setFullName(entity.getFirstName() + " " + entity.getLastName());
         return dto;
     }
@@ -87,6 +89,7 @@ public class UserDto {
         entity.setLocation(dto.getLocation());
         entity.setFirstLogin(dto.isFirstLogin);
         entity.setState(dto.getState());
+        entity.setEmail(dto.getEmail());
         return entity;
     }
 

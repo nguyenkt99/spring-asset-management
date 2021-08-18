@@ -12,6 +12,8 @@ import java.util.List;
 public interface UserService {
     UsersEntity findByUserName(String username);
 
+    UsersEntity findByEmail(String email);
+
     UserDto changepassword(String username, String passwordEncode);
 
     public UserDto saveUser(UserDto userDto) throws BadRequestException;

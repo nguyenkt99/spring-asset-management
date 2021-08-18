@@ -1,9 +1,11 @@
 package com.nashtech.AssetManagement_backend.service.Impl;
 
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import com.nashtech.AssetManagement_backend.dto.UserDto;
+import com.nashtech.AssetManagement_backend.entity.UsersEntity;
 import com.nashtech.AssetManagement_backend.payload.request.LoginRequest;
 import com.nashtech.AssetManagement_backend.payload.response.JwtResponse;
 import com.nashtech.AssetManagement_backend.security.jwt.JwtUtils;
@@ -13,6 +15,8 @@ import com.nashtech.AssetManagement_backend.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,14 +30,15 @@ public class AuthServiceImpl implements AuthService{
     private final JwtUtils jwtUtils;
     private final PasswordEncoder encoder;
     private final UserService userService;
-
+    private final JavaMailSender javaMailSender;
     @Autowired
     AuthServiceImpl(AuthenticationManager authenticationManager, JwtUtils jwtUtils,
-                    PasswordEncoder encoder, UserService userService) {
+                    PasswordEncoder encoder, UserService userService, JavaMailSender javaMailSender) {
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
         this.encoder = encoder;
         this.userService = userService;
+        this.javaMailSender = javaMailSender;
     }
 
     @Override
@@ -69,5 +74,46 @@ public class AuthServiceImpl implements AuthService{
     public UserDto changepassword(String username, String password) {
         String passwordEncode = encoder.encode(password);
         return userService.changepassword(username, passwordEncode);
+    }
+
+    @Override
+    public Boolean forgotpassword(String email) {
+        UsersEntity entity = userService.findByEmail(email);
+        String pass=getRandomNumberString();
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setTo(email);
+        msg.setSubject("Your password is");
+        msg.setText("Your password is "+pass);
+        try{
+            changepassword(entity.getUserName(),pass);
+            javaMailSender.send(msg);
+            return true;
+        }catch (Exception e)
+        {
+            return false;
+        }
+
+    }
+
+    @Override
+    public String getOTP(String email) {
+        UsersEntity entity = userService.findByEmail(email);
+        String OTP=getRandomNumberString();
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setTo(email);
+        msg.setSubject("Your OTP is");
+        msg.setText("Your OTP is "+OTP);
+        javaMailSender.send(msg);
+        return OTP;
+    }
+
+    public static String getRandomNumberString() {
+        // It will generate 6 digit random Number.
+        // from 0 to 999999
+        Random rnd = new Random();
+        int number = rnd.nextInt(999999);
+
+        // this will convert any number sequence into 6 character.
+        return String.format("%06d", number);
     }
 }

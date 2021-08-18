@@ -45,7 +45,11 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUserName(username)
                 .orElseThrow(() -> new NotFoundExecptionHandle("Could not found user: " + username));
     }
-
+    @Override
+    public UsersEntity findByEmail(String email)
+    {
+        return userRepository.findByEmail(email).orElseThrow(()-> new NotFoundExecptionHandle("Could not found user: " + email));
+    }
     @Override
     public UserDto changepassword(String username, String passwordEncode) {
         UsersEntity existUser = findByUserName(username);
@@ -72,7 +76,8 @@ public class UserServiceImpl implements UserService {
         int day = getDayNumberOld(usersEntity.getJoinedDate());
         if (day == 7 || day == 1)
             throw new InvalidInputException("Joined date is Saturday or Sunday. Please select a different date");
-
+        if(userRepository.existsByEmail(userDto.getEmail()))
+            throw new InvalidInputException("Email is exists");
         usersEntity.setFirstLogin(true);
         RolesEntity rolesEntity = roleRepository.getByName(userDto.getType());
         usersEntity.setRole(rolesEntity);
@@ -118,7 +123,8 @@ public class UserServiceImpl implements UserService {
         int day = getDayNumberOld(userDto.getJoinedDate());
         if (day == 7 || day == 1)
             throw new InvalidInputException("Joined date is Saturday or Sunday. Please select a different date");
-
+        if(userRepository.existsByEmail(userDto.getEmail()))
+            throw new InvalidInputException("Email is exists");
         existUser.setDateOfBirth(userDto.getDateOfBirth());
         existUser.setGender(userDto.getGender());
         existUser.setJoinedDate(userDto.getJoinedDate());

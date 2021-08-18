@@ -1,5 +1,6 @@
 package com.nashtech.AssetManagement_backend.controller;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.validation.Valid;
@@ -33,5 +34,38 @@ public class AuthController {
     @ResponseBody
     public UserDto changepassword(Authentication authentication, @RequestBody Map<String, Object> password) {
         return authService.changepassword(authentication.getName(), password.get("password").toString());
+    }
+    @PostMapping("/forgotPassword")
+    @ResponseBody
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String,Object> email) {
+        Map<String,String> map=new HashMap<>();
+
+        if(authService.forgotpassword(email.get("email").toString()))
+        {
+            map.put("message","Your new password has been sent to your email");
+            return ResponseEntity.ok(map);
+
+        }else
+        {
+            map.put("message","Something went wrong");
+            return ResponseEntity.badRequest().body(map);
+        }
+
+    }
+    @PostMapping("/otp")
+    @ResponseBody
+    public ResponseEntity<?> getOTP(@RequestBody Map<String,Object> email) {
+        Map<String,String> map=new HashMap<>();
+        String OTP =authService.getOTP(email.get("email").toString());
+        if(OTP.equals(""))
+        {
+            map.put("message","Something went wrong");
+            return ResponseEntity.badRequest().body(map);
+        }else
+        {
+            map.put("message",OTP);
+            return ResponseEntity.ok(map);
+        }
+
     }
 }
