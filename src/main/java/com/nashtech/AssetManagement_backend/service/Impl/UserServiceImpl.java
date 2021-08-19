@@ -127,9 +127,16 @@ public class UserServiceImpl implements UserService {
         int day = getDayNumberOld(userDto.getJoinedDate());
         if (day == 7 || day == 1)
             throw new InvalidInputException("Joined date is Saturday or Sunday. Please select a different date");
-        if(!existUser.getEmail().equals(userDto.getEmail()))
+        if(existUser.getEmail()!=null)
+        {
+            if(!existUser.getEmail().equals(userDto.getEmail()))
+                if(userRepository.existsByEmail(userDto.getEmail()))
+                    throw new InvalidInputException("Email is exists");
+        }else
+        {
             if(userRepository.existsByEmail(userDto.getEmail()))
                 throw new InvalidInputException("Email is exists");
+        }
         existUser.setDateOfBirth(userDto.getDateOfBirth());
         existUser.setGender(userDto.getGender());
         existUser.setJoinedDate(userDto.getJoinedDate());
