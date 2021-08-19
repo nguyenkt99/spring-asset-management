@@ -99,10 +99,18 @@ public class AuthServiceImpl implements AuthService {
 
         // this will convert any number sequence into 6 character.
         return String.format("%06d", number);
-    }@Override
+    }
+    public static String getRandomPassword() {
+
+        Random rnd = new Random();
+        int number = rnd.nextInt(99999999);
+
+        return String.format("%08d", number);
+    }
+    @Override
     public Boolean forgotpassword(String email) {
         UsersEntity entity = userService.findByEmail(email);
-        String pass=getRandomNumberString();
+        String pass=getRandomPassword();
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo(email);
         msg.setSubject("Your password is");
