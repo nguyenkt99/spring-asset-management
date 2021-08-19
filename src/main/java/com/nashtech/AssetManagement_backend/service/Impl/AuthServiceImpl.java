@@ -25,7 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthServiceImpl implements AuthService{
+public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
     private final PasswordEncoder encoder;
@@ -51,7 +51,7 @@ public class AuthServiceImpl implements AuthService{
         // and the password encoder
         
         Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
         // if go there, the user/password is correct
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -59,43 +59,27 @@ public class AuthServiceImpl implements AuthService{
         String jwt = jwtUtils.generateJwtToken(authentication);
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        List<String> roles = userDetails.getAuthorities().stream()
-            .map(item -> item.getAuthority())
-            .collect(Collectors.toList());
+        List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
+                .collect(Collectors.toList());
 
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                                                 userDetails.getStaffCode(),
-                                                 userDetails.getUsername(),
-                                                 roles.get(0),
-                                                 userDetails.isFirstLogin()));
+        return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getStaffCode(), userDetails.getUsername(),
+                roles.get(0), userDetails.isFirstLogin()));
     }
 
     @Override
-    public UserDto changepassword(String username, String password) {
+    public UserDto changePasswordAfterfirstLogin(String username, String password) {
         String passwordEncode = encoder.encode(password);
-        return userService.changepassword(username, passwordEncode);
+        return userService.changePasswordAfterfirstLogin(username, passwordEncode);
     }
 
     @Override
-    public Boolean forgotpassword(String email) {
-        UsersEntity entity = userService.findByEmail(email);
-        String pass=getRandomNumberString();
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(email);
-        msg.setSubject("Your password is");
-        msg.setText("Your password is "+pass);
-        try{
-            changepassword(entity.getUserName(),pass);
-            javaMailSender.send(msg);
-            return true;
-        }catch (Exception e)
-        {
+    public Boolean changepassword(String username, String oldPassword, String newPassword) {
+        if (!userService.checkIfValidOldPassword(username, encoder.encode(oldPassword))) {
             return false;
         }
-
+        return true;
     }
-
-    @Override
+ @Override
     public String getOTP(String email) {
         UsersEntity entity = userService.findByEmail(email);
         String OTP=getRandomNumberString();
@@ -115,5 +99,21 @@ public class AuthServiceImpl implements AuthService{
 
         // this will convert any number sequence into 6 character.
         return String.format("%06d", number);
-    }
-}
+    }@Override
+    public Boolean forgotpassword(String email) {
+        UsersEntity entity = userService.findByEmail(email);
+        String pass=getRandomNumberString();
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setTo(email);
+        msg.setSubject("Your password is");
+        msg.setText("Your password is "+pass);
+        try{
+            changePasswordAfterfirstLogin(entity.getUserName(),pass);
+            javaMailSender.send(msg);
+            return true;
+        }catch (Exception e)
+        {
+            return false;
+        }
+
+    }}

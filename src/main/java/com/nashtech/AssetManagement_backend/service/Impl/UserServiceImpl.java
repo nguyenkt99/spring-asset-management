@@ -45,13 +45,13 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUserName(username)
                 .orElseThrow(() -> new NotFoundExecptionHandle("Could not found user: " + username));
     }
-    @Override
+@Override
     public UsersEntity findByEmail(String email)
     {
         return userRepository.findByEmail(email).orElseThrow(()-> new NotFoundExecptionHandle("Could not found user: " + email));
     }
     @Override
-    public UserDto changepassword(String username, String passwordEncode) {
+    public UserDto changePasswordAfterfirstLogin(String username, String passwordEncode) {
         UsersEntity existUser = findByUserName(username);
         existUser.setPassword(passwordEncode);
         existUser.setFirstLogin(false);
@@ -64,6 +64,11 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public Boolean checkIfValidOldPassword(String username, String oldPassword) {
+        UsersEntity user = findByUserName(username);
+        return user.getPassword().equals(oldPassword);
+    }
 
     @Override
     public UserDto saveUser(UserDto userDto) throws BadRequestException {
@@ -87,8 +92,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> retrieveUsers(Location location) {
-        UserState userState = null;
-        List<UsersEntity> usersEntities = userRepository.findAllByLocationAndState(location, userState.Enable);
+        List<UsersEntity> usersEntities = userRepository.findAllByLocationAndState(location, UserState.Enable);
         usersEntities = usersEntities.stream().sorted(Comparator.comparing(o -> (o.getFirstName() + ' ' + o.getLastName())))
                 .collect(Collectors.toList());
         return new UserDto().toListDto(usersEntities);
@@ -183,9 +187,8 @@ public class UserServiceImpl implements UserService {
     private boolean checkAge(Date dOB, Date joinDate) {
         LocalDate date1 = dOB.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         LocalDate date2 = joinDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate now = LocalDate.now();
         Period period = Period.between(date1, date2);
-        int temp = period.getYears();
         return period.getYears() >= 18 ? true : false;
     }
+
 }

@@ -14,9 +14,7 @@ import com.nashtech.AssetManagement_backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,25 +34,16 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Override
     public List<AssignmentDTO> getAllByAdmimLocation(String username) {
         Location location = userService.findByUserName(username).getLocation();
-        List<AssignmentDTO> assignmentDTOs = assignmentRepository.findAll().stream()
-                .filter(p -> (p.getAssignBy().getLocation().equals(location)
-                        && !p.getState().equals(AssignmentState.COMPLETED)
-                        && !p.getState().equals(AssignmentState.CANCELED_ASSIGN)))
-                .map(AssignmentDTO::toDTO).collect(Collectors.toList());
-        assignmentDTOs.sort(Comparator.comparing(AssignmentDTO::getAssignedDate));
+        List<AssignmentDTO> assignmentDTOs = assignmentRepository.findAllByAdmimLocation(location)
+                .stream().map(AssignmentDTO::toDTO).collect(Collectors.toList());
         return assignmentDTOs;
     }
 
     @Override
     public List<AssignmentDTO> getAssignmentsByUser(String username) {
-        Date currentDate = new Date();
-        List<AssignmentDTO> assignmentDTOs = assignmentRepository.findAll().stream()
-                .filter(p -> (p.getAssignTo().getUserName().equals(username)
-                        && !p.getState().equals(AssignmentState.COMPLETED)
-                        && !p.getState().equals(AssignmentState.CANCELED_ASSIGN)
-                        && (p.getAssignedDate().compareTo(currentDate) <= 0)))
-                .map(AssignmentDTO::toDTO).collect(Collectors.toList());
-        assignmentDTOs.sort(Comparator.comparing(AssignmentDTO::getAssignedDate));
+        List<AssignmentDTO> assignmentDTOs = assignmentRepository.findAssignmentsByUser(username)
+                .stream().map(AssignmentDTO::toDTO).collect(Collectors.toList());
+        assignmentDTOs.sort(Comparator.comparing(AssignmentDTO::getId));
         return assignmentDTOs;
     }
 
@@ -72,6 +61,10 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("AssignTo not found!"));
         UsersEntity assignBy = userRepository.findByUserName(assignmentDTO.getAssignedBy())
                 .orElseThrow(() -> new ResourceNotFoundException("AssignBy not found!"));
+
+        if (assignTo.getLocation() != assignBy.getLocation()) {
+            throw new ConflictException("The location of assignTo difference from admin!");
+        }
 
         AssetEntity asset = assetRepository.findById(assignmentDTO.getAssetCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Asset not found!"));
@@ -97,6 +90,8 @@ public class AssignmentServiceImpl implements AssignmentService {
         if (assignment.getState() != AssignmentState.WAITING_FOR_ACCEPTANCE) {
             throw new ConflictException("Assignment is editable while in state Waiting for acceptance!");
         }
+        UsersEntity assignTo = assignment.getAssignTo();
+        UsersEntity assignBy;
 
         // case: new asset
         if (!assignmentDTO.getAssetCode().equalsIgnoreCase(assignment.getAssetEntity().getAssetCode())) {
@@ -112,16 +107,21 @@ public class AssignmentServiceImpl implements AssignmentService {
 
         // case: new assign to
         if (!assignment.getAssignTo().getUserName().equalsIgnoreCase(assignmentDTO.getAssignedTo())) {
-            UsersEntity assignTo = userRepository.findByUserName(assignmentDTO.getAssignedTo())
+            assignTo = userRepository.findByUserName(assignmentDTO.getAssignedTo())
                     .orElseThrow(() -> new ResourceNotFoundException("AssignTo not found!"));
             assignment.setAssignTo(assignTo);
         }
 
         // case: new assign by
         if (!assignment.getAssignBy().getUserName().equalsIgnoreCase(assignmentDTO.getAssignedBy())) {
-            UsersEntity assignBy = userRepository.findByUserName(assignmentDTO.getAssignedBy())
+            assignBy = userRepository.findByUserName(assignmentDTO.getAssignedBy())
                     .orElseThrow(() -> new ResourceNotFoundException("AssignBy not found!"));
             assignment.setAssignTo(assignBy);
+
+            // check location
+            if (assignTo.getLocation() != assignBy.getLocation()) {
+                throw new ConflictException("The location of assignTo difference from admin!");
+            }
         }
 
         assignment.setNote(assignmentDTO.getNote());

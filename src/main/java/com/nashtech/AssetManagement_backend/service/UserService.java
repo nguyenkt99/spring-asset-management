@@ -14,7 +14,10 @@ public interface UserService {
 
     UsersEntity findByEmail(String email);
 
-    UserDto changepassword(String username, String passwordEncode);
+    UserDto changePasswordAfterfirstLogin(String username, String passwordEncode);
+
+    Boolean checkIfValidOldPassword(String username, String oldPassword);
+
 
     public UserDto saveUser(UserDto userDto) throws BadRequestException;
 
@@ -33,4 +36,5 @@ public interface UserService {
     Boolean canDisableUser(String staffCode);
 
     Boolean disableUser(String staffCode);
+
 }

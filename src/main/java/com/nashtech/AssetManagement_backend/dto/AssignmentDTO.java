@@ -41,6 +41,8 @@ public class AssignmentDTO {
 
     private String note;
 
+    private Boolean isCreatedRequest = false;
+
     public static AssignmentDTO toDTO(AssignmentEntity assign) {
         if (assign == null)
             return null;
@@ -52,12 +54,15 @@ public class AssignmentDTO {
         dto.setAssignedTo(assign.getAssignTo().getUserName());
         dto.setAssignedBy(assign.getAssignBy().getUserName());
         dto.setAssignedDate(assign.getAssignedDate());
-        if (assign.getState().equals(AssignmentState.COMPLETED))
+//        if (assign.getState().equals(AssignmentState.COMPLETED))
+        if(assign.getRequests().size() > 0)
             dto.setReturnedDate(assign.getRequests().get(assign.getRequests().size() - 1).getRequestedDate());
         else
             dto.setReturnedDate(null);
         dto.setState(assign.getState());
         dto.setNote(assign.getNote());
+        if(assign.getRequests().size() > 0)
+            dto.setIsCreatedRequest(true);
         return dto;
     }
 

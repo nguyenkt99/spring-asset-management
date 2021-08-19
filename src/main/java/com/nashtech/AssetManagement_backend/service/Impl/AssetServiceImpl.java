@@ -64,14 +64,14 @@ public class AssetServiceImpl implements AssetService {
     public AssetDTO findByAssetName(String assetName) throws ResourceNotFoundException {
         AssetEntity assetEntity = assetRepo.findByAssetName(assetName).orElseThrow(
                 () -> new ResourceNotFoundException("Asset is not found for this asset name:" + assetName));
-        return new AssetDTO().toDTO(assetEntity);
+        return AssetDTO.toDTO(assetEntity);
     }
 
     @Override
     public AssetDTO findbyId(String assetCode) throws ResourceNotFoundException {
         AssetEntity assetEntity = assetRepo.findById(assetCode).orElseThrow(
                 () -> new ResourceNotFoundException("Asset is not found for this asset code:" + assetCode));
-        return new AssetDTO().toDTO(assetEntity);
+        return AssetDTO.toDTO(assetEntity);
     }
 
     @Override

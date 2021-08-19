@@ -21,7 +21,7 @@ public class RequestEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "state")
-    private AssignmentState state;
+    private RequestState state;
 
     @Column(name = "requested_date")
     private Date requestedDate;

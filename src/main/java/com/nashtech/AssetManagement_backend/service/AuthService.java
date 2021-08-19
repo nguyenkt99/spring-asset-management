@@ -7,7 +7,8 @@ import org.springframework.http.ResponseEntity;
 
 public interface AuthService {
     ResponseEntity<?> authenticateUser(LoginRequest loginRequest);
-    UserDto changepassword(String username, String password);
-    Boolean forgotpassword(String email);
-    String getOTP(String email);
+    UserDto changePasswordAfterfirstLogin(String username, String password);
+    Boolean changepassword(String username, String oldPassword, String newPassword);
+Boolean forgotpassword(String email);
+String getOTP(String email);
 }
