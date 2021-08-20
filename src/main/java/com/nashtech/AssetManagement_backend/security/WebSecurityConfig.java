@@ -77,17 +77,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable().exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
-                .antMatchers("/api/auth/assignment").hasRole("ADMIN")
-                .antMatchers("/api/assignment/staff/**").access("hasRole('STAFF') OR hasRole('ADMIN')")
-                .antMatchers("/api/assignment/**").hasRole("ADMIN")
-                .antMatchers("/api/auth/signin").permitAll()
-                .antMatchers("/api/auth/otp").permitAll()
-                .antMatchers("/api/auth/forgotPassword").permitAll()
+                .antMatchers("/api/assignment").hasRole("ADMIN")
+                .antMatchers("/api/assignment/home").hasAnyRole("ADMIN", "STAFF")
+                .antMatchers("/api/auth/**").permitAll()
                 .anyRequest().authenticated();
 
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     }
-
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {

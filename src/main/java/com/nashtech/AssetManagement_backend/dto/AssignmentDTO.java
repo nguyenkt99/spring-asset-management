@@ -23,6 +23,8 @@ public class AssignmentDTO {
     @NotBlank
     private String assetName;
 
+    private String category;
+
     private String specfication;
 
     @NotBlank
@@ -50,6 +52,7 @@ public class AssignmentDTO {
         dto.setId(assign.getId());
         dto.setAssetCode(assign.getAssetEntity().getAssetCode());
         dto.setAssetName(assign.getAssetEntity().getAssetName());
+        dto.setCategory(assign.getAssetEntity().getCategoryEntity().getName());
         dto.setSpecfication(assign.getAssetEntity().getSpecification());
         dto.setAssignedTo(assign.getAssignTo().getUserName());
         dto.setAssignedBy(assign.getAssignBy().getUserName());

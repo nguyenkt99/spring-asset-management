@@ -5,7 +5,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import com.nashtech.AssetManagement_backend.dto.UserDto;
-import com.nashtech.AssetManagement_backend.entity.UsersEntity;
+import com.nashtech.AssetManagement_backend.handleException.RuntimeExceptionHandle;
 import com.nashtech.AssetManagement_backend.payload.request.LoginRequest;
 import com.nashtech.AssetManagement_backend.payload.response.JwtResponse;
 import com.nashtech.AssetManagement_backend.security.jwt.JwtUtils;
@@ -14,6 +14,7 @@ import com.nashtech.AssetManagement_backend.service.AuthService;
 import com.nashtech.AssetManagement_backend.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -74,10 +75,20 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public Boolean changepassword(String username, String oldPassword, String newPassword) {
-        if (!userService.checkIfValidOldPassword(username, encoder.encode(oldPassword))) {
-            return false;
+        HttpStatus statusCode = null;
+        try {
+            ResponseEntity<?> result = authenticateUser(new LoginRequest(username, oldPassword));
+            statusCode = result.getStatusCode();
+            if (statusCode == HttpStatus.OK) {
+                String passwordEncode = encoder.encode(newPassword);
+                if(userService.changePassword(username, passwordEncode) != null)
+                    return true;
+                return false;
+            }
+        } catch (Exception e) {
+            new RuntimeExceptionHandle(e.toString());
         }
-        return true;
+        return false;
     }
  @Override
     public String getOTP(String email) {

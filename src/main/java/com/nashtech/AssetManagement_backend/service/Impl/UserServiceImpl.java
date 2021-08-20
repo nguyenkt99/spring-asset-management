@@ -65,17 +65,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean checkIfValidOldPassword(String username, String oldPassword) {
-        UsersEntity user = findByUserName(username);
-        return user.getPassword().equals(oldPassword);
+    public UserDto changePassword(String username, String passwordEncode) {
+        UsersEntity existUser = findByUserName(username);
+        existUser.setPassword(passwordEncode);
+
+        try {
+            UsersEntity user = userRepository.save(existUser);
+            return new UserDto().toDto(user);
+        } catch (Exception e) {
+            throw new BadRequestException("invalid Request");
+        }
     }
 
     @Override
     public UserDto saveUser(UserDto userDto) throws BadRequestException {
         UsersEntity usersEntity = userDto.toEntity(userDto);
-        //validate
+        // validate
         if (usersEntity.getJoinedDate().before(usersEntity.getDateOfBirth()))
-            throw new InvalidInputException("Joined date is not later than Date of Birth. Please select a different date");
+            throw new InvalidInputException(
+                    "Joined date is not later than Date of Birth. Please select a different date");
         if (!checkAge(usersEntity.getDateOfBirth(), usersEntity.getJoinedDate()))
             throw new InvalidInputException("User is under 18. Please select a different date");
         int day = getDayNumberOld(usersEntity.getJoinedDate());
@@ -93,7 +101,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDto> retrieveUsers(Location location) {
         List<UsersEntity> usersEntities = userRepository.findAllByLocationAndState(location, UserState.Enable);
-        usersEntities = usersEntities.stream().sorted(Comparator.comparing(o -> (o.getFirstName() + ' ' + o.getLastName())))
+        usersEntities = usersEntities.stream()
+                .sorted(Comparator.comparing(o -> (o.getFirstName() + ' ' + o.getLastName())))
                 .collect(Collectors.toList());
         return new UserDto().toListDto(usersEntities);
     }
@@ -117,11 +126,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateUser(UserDto userDto) {
-        UsersEntity existUser = userRepository.findByStaffCode(userDto.getStaffCode())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found for this staff code: " + userDto.getStaffCode()));
+        UsersEntity existUser = userRepository.findByStaffCode(userDto.getStaffCode()).orElseThrow(
+                () -> new ResourceNotFoundException("User not found for this staff code: " + userDto.getStaffCode()));
 
         if (userDto.getJoinedDate().before(userDto.getDateOfBirth()))
-            throw new InvalidInputException("Joined date is not later than Date of Birth. Please select a different date");
+            throw new InvalidInputException(
+                    "Joined date is not later than Date of Birth. Please select a different date");
         if (!checkAge(userDto.getDateOfBirth(), userDto.getJoinedDate()))
             throw new InvalidInputException("User is under 18. Please select a different date");
         int day = getDayNumberOld(userDto.getJoinedDate());
@@ -161,21 +171,20 @@ public class UserServiceImpl implements UserService {
         return userRepository.getByUserName(userName).getLocation();
     }
 
-    private final String USER_NOT_FOUND="user is not found.";
-    private final String DISABLE_CONFLICT="There are valid assignments belonging to this user. Please close all assignments before disabling user.";
+    private final String USER_NOT_FOUND = "user is not found.";
+    private final String DISABLE_CONFLICT = "There are valid assignments belonging to this user. Please close all assignments before disabling user.";
 
     @Override
     public Boolean canDisableUser(String staffCode) {
         return !(userRepository.findByStaffCode(staffCode)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND))
-                .getAssignmentsBys().size()>0);
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND)).getAssignmentsBys().size() > 0);
     }
 
     @Override
     public Boolean disableUser(String staffCode) {
         UsersEntity usersEntity = userRepository.findByStaffCode(staffCode)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
-        if (usersEntity.getAssignmentTos().size()>0){
+        if (usersEntity.getAssignmentTos().size() > 0) {
             throw new ConflictException(DISABLE_CONFLICT);
         }
         usersEntity.setState(UserState.Disabled);

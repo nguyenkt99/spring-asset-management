@@ -16,8 +16,7 @@ public interface UserService {
 
     UserDto changePasswordAfterfirstLogin(String username, String passwordEncode);
 
-    Boolean checkIfValidOldPassword(String username, String oldPassword);
-
+    UserDto changePassword(String username, String passwordEncode);
 
     public UserDto saveUser(UserDto userDto) throws BadRequestException;
 

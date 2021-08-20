@@ -25,7 +25,7 @@ public interface AssignmentRepository extends JpaRepository<AssignmentEntity, Lo
 
     @Transactional
     @Query("select a from AssignmentEntity a "
-            + "join UsersEntity u on u = a.assignBy "
+            + "join UsersEntity u on u = a.assignTo "
             + "where u.userName like :username "
             + "and current_date >= a.assignedDate "
             + "and (a.state like 'ACCEPTED' "
