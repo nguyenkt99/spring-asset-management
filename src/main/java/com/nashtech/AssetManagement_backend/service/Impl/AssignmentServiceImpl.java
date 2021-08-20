@@ -14,7 +14,10 @@ import com.nashtech.AssetManagement_backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+import java.time.DateTimeException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,6 +59,11 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @Override
     public AssignmentDTO save(AssignmentDTO assignmentDTO) {
+        SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+        String checkDate = checkDate(format.format(assignmentDTO.getAssignedDate()));
+        if (!checkDate.equals("")) {
+            throw new DateTimeException(checkDate);
+        }
         AssignmentEntity assignment = AssignmentDTO.toEntity(assignmentDTO);
         UsersEntity assignTo = userRepository.findByUserName(assignmentDTO.getAssignedTo())
                 .orElseThrow(() -> new ResourceNotFoundException("AssignTo not found!"));
@@ -85,6 +93,11 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @Override
     public AssignmentDTO update(AssignmentDTO assignmentDTO) {
+        SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+        String checkDate = checkDate(format.format(assignmentDTO.getAssignedDate()));
+        if (!checkDate.equals("")) {
+            throw new DateTimeException(checkDate);
+        }
         AssignmentEntity assignment = assignmentRepository.findById(assignmentDTO.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Assignment not found!"));
         if (assignment.getState() != AssignmentState.WAITING_FOR_ACCEPTANCE) {
@@ -168,5 +181,21 @@ public class AssignmentServiceImpl implements AssignmentService {
         assignment.setState(state);
         return AssignmentDTO.toDTO(assignmentRepository.save(assignment));
     }
+    private String checkDate(String date) {
+        Date currentDate = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+        format.setLenient(false);
+        Date assignedDate = new Date();
+        try {
+            assignedDate = format.parse(date);
+        } catch (Exception ex) {
+            return "Wrong date! (MM/dd/yyyy)";
+        }
 
+        long diff = TimeUnit.DAYS.convert(assignedDate.getTime() - currentDate.getTime(), TimeUnit.MILLISECONDS);
+        if (diff < 0) {
+            return "Assigned Date need to be equal or bigger than current date";
+        }
+        return "";
+    }
 }
