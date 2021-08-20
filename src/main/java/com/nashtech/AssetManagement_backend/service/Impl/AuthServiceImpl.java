@@ -5,6 +5,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import com.nashtech.AssetManagement_backend.dto.UserDto;
+import com.nashtech.AssetManagement_backend.entity.UsersEntity;
 import com.nashtech.AssetManagement_backend.handleException.RuntimeExceptionHandle;
 import com.nashtech.AssetManagement_backend.payload.request.LoginRequest;
 import com.nashtech.AssetManagement_backend.payload.response.JwtResponse;
