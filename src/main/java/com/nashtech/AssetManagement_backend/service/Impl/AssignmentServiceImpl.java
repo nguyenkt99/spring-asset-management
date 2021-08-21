@@ -81,7 +81,9 @@ public class AssignmentServiceImpl implements AssignmentService {
         if (assignTo.getLocation() != assignBy.getLocation()) {
             throw new ConflictException("The location of assignTo difference from admin!");
         }
-
+        if(assignedDate.before(todayDate)) {
+            throw new ConflictException("The assigned date is current or future!");
+        }
         AssetEntity asset = assetRepository.findById(assignmentDTO.getAssetCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Asset not found!"));
         if (asset.getState() != AssetState.AVAILABLE) {
@@ -101,7 +103,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         msg.setText("Your administrator has assigned you a new assignment: \nAsset " +
                 "code: "+assignment.getAssetEntity().getAssetCode()+
                 "\nAsset name: "+ assignment.getAssetEntity().getAssetName()+
-                "\nDate: "+format.format(assignment.getAssignedDate())+
+                "\nDate: "+dateFormatter.format(assignment.getAssignedDate())+
                 "\nPlease check your assignment by your account\nKind Regards,\nAdministrator");
         javaMailSender.send(msg);
         return AssignmentDTO.toDTO(assignmentRepository.save(assignment));
@@ -173,7 +175,7 @@ public class AssignmentServiceImpl implements AssignmentService {
                 "\nAssignment code: "+assignment.getId()+
                 "\nAsset code: "+assignment.getAssetEntity().getAssetCode()+
                 "\nAsset name: "+ assignment.getAssetEntity().getAssetName()+
-                "\nDate: "+format.format(assignment.getAssignedDate())+
+                "\nDate: "+dateFormatter.format(assignment.getAssignedDate())+
                 "\nPlease check your assignment by your account\nKind Regards,\nAdministrator");
         javaMailSender.send(msg);
         return AssignmentDTO.toDTO(assignmentRepository.save(assignment));
