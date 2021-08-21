@@ -1,8 +1,11 @@
 package com.nashtech.AssetManagement_backend.controller;
 
 import com.nashtech.AssetManagement_backend.dto.RequestDTO;
+import com.nashtech.AssetManagement_backend.security.services.UserDetailsImpl;
 import com.nashtech.AssetManagement_backend.service.RequestService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,5 +28,19 @@ public class RequestController {
     @GetMapping
     public List<RequestDTO> getAll(HttpServletRequest request) {
         return requestService.getAllByAdminLocation(request.getAttribute("userName").toString());
+    }
+
+    @PatchMapping("/{requestId}")
+    public ResponseEntity<Void> acceptRequest(@PathVariable("requestId") Long requestId) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        requestService.accept(requestId, userDetails.getStaffCode());
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{requestId}")
+    public ResponseEntity<?> cancelRequest(@PathVariable Long requestId) {
+        requestService.delete(requestId);
+        return ResponseEntity.noContent().build();
     }
 }

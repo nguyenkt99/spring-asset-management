@@ -3,6 +3,7 @@ package com.nashtech.AssetManagement_backend.service.Impl;
 import com.nashtech.AssetManagement_backend.dto.AssignmentDTO;
 import com.nashtech.AssetManagement_backend.dto.RequestDTO;
 import com.nashtech.AssetManagement_backend.entity.*;
+import com.nashtech.AssetManagement_backend.exception.BadRequestException;
 import com.nashtech.AssetManagement_backend.exception.ConflictException;
 import com.nashtech.AssetManagement_backend.exception.ResourceNotFoundException;
 import com.nashtech.AssetManagement_backend.repository.AssignmentRepository;
@@ -38,7 +39,7 @@ public class RequestServiceImpl implements RequestService {
             throw new ConflictException("Assignment must have accepted state!");
         }
 
-        if(assignment.getRequests().size() > 0) {
+        if (assignment.getRequests().size() > 0) {
             throw new ConflictException("Request has already been created!");
         }
 
@@ -62,4 +63,30 @@ public class RequestServiceImpl implements RequestService {
         return requestDTOs;
     }
 
+    @Override
+    public void delete(Long id) {
+        RequestEntity request = requestRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Request not found"));
+        if (!request.getState().equals(RequestState.WAITING_FOR_RETURNING))
+            throw new ConflictException("Request must be waiting for returning!");
+        requestRepository.deleteById(id);
+    }
+
+    @Override
+    public void accept(Long id, String staffCode) {
+        RequestEntity request = requestRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(REQUEST_NOT_FOUND_ERROR));
+        if (!request.getState().equals(RequestState.WAITING_FOR_RETURNING))
+            throw new BadRequestException(REQUEST_STATE_INVALID_ERROR);
+        request.setState(RequestState.COMPLETED);
+        request.setAcceptBy(userRepository.getByStaffCode(staffCode));
+        request.setReturnedDate(new Date());
+        requestRepository.save(request);
+        AssignmentEntity assignment = request.getAssignmentEntity();
+        assignment.setState(AssignmentState.COMPLETED);
+        assignmentRepository.save(assignment);
+    }
+
+    private final String REQUEST_NOT_FOUND_ERROR = "Request not found.";
+    private final String REQUEST_STATE_INVALID_ERROR = "Request state must be 'Waiting for returning'.";
 }

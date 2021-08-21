@@ -129,7 +129,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         if (!assignment.getAssignBy().getUserName().equalsIgnoreCase(assignmentDTO.getAssignedBy())) {
             assignBy = userRepository.findByUserName(assignmentDTO.getAssignedBy())
                     .orElseThrow(() -> new ResourceNotFoundException("AssignBy not found!"));
-            assignment.setAssignTo(assignBy);
+            assignment.setAssignBy(assignBy);
 
             // check location
             if (assignTo.getLocation() != assignBy.getLocation()) {
@@ -146,7 +146,6 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @Override
     public boolean deleteAssignment(Long assignmentId, Location location) {
-
         AssignmentEntity assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Assignment not found!"));
 
@@ -154,8 +153,8 @@ public class AssignmentServiceImpl implements AssignmentService {
             throw new BadRequestException("Invalid access!");
         }
 
-        if (assignment.getState() != AssignmentState.WAITING_FOR_ACCEPTANCE) {
-            throw new BadRequestException("Assignment delete when state is Waiting for acceptance!");
+        if (assignment.getState() == AssignmentState.ACCEPTED) {
+            throw new BadRequestException("Assignment delete when state is Waiting for acceptance or Declined!");
         }
 
         AssetEntity assetEntity = assetRepository.getById(assignment.getAssetEntity().getAssetCode());
@@ -163,9 +162,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         assetRepository.save(assetEntity);
 
         assignmentRepository.deleteById(assignmentId);
-
         return true;
-
     }
 
     @Override
@@ -178,6 +175,13 @@ public class AssignmentServiceImpl implements AssignmentService {
             throw new BadRequestException("Assignment updated when state is Waiting for acceptance!");
         if (state != AssignmentState.ACCEPTED && state != AssignmentState.CANCELED_ASSIGN)
             throw new BadRequestException("Assignment can not be updated!");
+
+        AssetEntity asset = assignment.getAssetEntity();
+        if(state == AssignmentState.CANCELED_ASSIGN) { // set asset's state is available when user decline assignment
+            asset.setState(AssetState.AVAILABLE);
+        }
+
+        assignment.setAssetEntity(asset);
         assignment.setState(state);
         return AssignmentDTO.toDTO(assignmentRepository.save(assignment));
     }
