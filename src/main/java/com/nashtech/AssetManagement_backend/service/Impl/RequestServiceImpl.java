@@ -11,9 +11,11 @@ import com.nashtech.AssetManagement_backend.repository.RequestRepository;
 import com.nashtech.AssetManagement_backend.repository.UserRepository;
 import com.nashtech.AssetManagement_backend.service.RequestService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -32,6 +34,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Autowired
     JavaMailSender javaMailSender;
+    SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");;
     @Override
     public RequestDTO create(RequestDTO requestDTO) {
         RequestEntity request = requestDTO.toEntity();
@@ -52,7 +55,22 @@ public class RequestServiceImpl implements RequestService {
         request.setAssignmentEntity(assignment);
         request.setRequestBy(requestBy);
         request.setState(RequestState.WAITING_FOR_RETURNING);
-
+        if(!requestBy.getUserName().equals(assignment.getAssignTo().getUserName()))
+        {
+            SimpleMailMessage msg = new SimpleMailMessage();
+            msg.setTo(assignment.getAssignTo().getEmail());
+            msg.setSubject("Returning asset");
+            msg.setText("Your administrator need you to return assets to the company: " +
+                    "" +
+                    "\nAsset" +
+                    " " +
+                    "code: "+assignment.getAssetEntity().getAssetCode()+
+                    "\nAsset name: "+ assignment.getAssetEntity().getAssetName()+
+                    "\nDate: "+format.format(request.getReturnedDate())+
+                    "\nPlease check your request by your account\nKind Regards," +
+                    "\nAdministrator");
+            javaMailSender.send(msg);
+        }
         return new RequestDTO(requestRepository.save(request));
     }
 
@@ -72,6 +90,18 @@ public class RequestServiceImpl implements RequestService {
                 .orElseThrow(() -> new ResourceNotFoundException("Request not found"));
         if (!request.getState().equals(RequestState.WAITING_FOR_RETURNING))
             throw new ConflictException("Request must be waiting for returning!");
+        if(request.getRequestBy().getRole().equals(RoleName.ROLE_STAFF))
+        {
+            SimpleMailMessage msg = new SimpleMailMessage();
+            msg.setTo(request.getAssignmentEntity().getAssignTo().getEmail());
+            msg.setSubject("Your request ");
+            msg.setText("Administrator has been decline your request: " +
+                    "\nRequestID: "+request.getId()+
+                    "\nAssignmentID: "+request.getAssignmentEntity().getId()+
+                    "\nKind Regards," +
+                    "\nAdministrator");
+            javaMailSender.send(msg);
+        }
         requestRepository.deleteById(id);
     }
 
@@ -87,6 +117,20 @@ public class RequestServiceImpl implements RequestService {
         requestRepository.save(request);
         AssignmentEntity assignment = request.getAssignmentEntity();
         assignment.setState(AssignmentState.COMPLETED);
+        if(request.getRequestBy().getRole().equals(RoleName.ROLE_STAFF))
+        {
+            SimpleMailMessage msg = new SimpleMailMessage();
+            msg.setTo(assignment.getAssignTo().getEmail());
+            msg.setSubject("Your request ");
+            msg.setText("Administrator has been accepted your request: " +
+                    "\nRequestID: "+request.getId()+
+                    "\nAsset code: "+assignment.getAssetEntity().getAssetCode()+
+                    "\nAsset name: "+ assignment.getAssetEntity().getAssetName()+
+                    "\nRequest state: "+request.getState()+
+                    "\nPlease check your request by your account\nKind Regards," +
+                    "\nAdministrator");
+            javaMailSender.send(msg);
+        }
         assignmentRepository.save(assignment);
     }
 
