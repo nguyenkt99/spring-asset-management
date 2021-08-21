@@ -116,6 +116,9 @@ public class RequestServiceImpl implements RequestService {
         request.setReturnedDate(new Date());
         requestRepository.save(request);
         AssignmentEntity assignment = request.getAssignmentEntity();
+        AssetEntity asset = assignment.getAssetEntity();
+        asset.setState(AssetState.AVAILABLE);
+        assignment.setAssetEntity(asset);
         assignment.setState(AssignmentState.COMPLETED);
         if(request.getRequestBy().getRole().equals(RoleName.ROLE_STAFF))
         {

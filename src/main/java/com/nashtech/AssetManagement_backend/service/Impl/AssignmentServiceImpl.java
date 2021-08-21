@@ -16,10 +16,9 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.DateTimeException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,16 +62,21 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @Override
     public AssignmentDTO save(AssignmentDTO assignmentDTO) {
-            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-            String checkDate = checkDate(format.format(assignmentDTO.getAssignedDate()));
-            if (!checkDate.equals("")) {
-                throw new DateTimeException(checkDate);
-            }
         AssignmentEntity assignment = AssignmentDTO.toEntity(assignmentDTO);
         UsersEntity assignTo = userRepository.findByUserName(assignmentDTO.getAssignedTo())
                 .orElseThrow(() -> new ResourceNotFoundException("AssignTo not found!"));
         UsersEntity assignBy = userRepository.findByUserName(assignmentDTO.getAssignedBy())
                 .orElseThrow(() -> new ResourceNotFoundException("AssignBy not found!"));
+
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        Date todayDate = null;
+        Date assignedDate = null;
+        try {
+            todayDate = dateFormatter.parse(dateFormatter.format(new Date()));
+            assignedDate = dateFormatter.parse(dateFormatter.format(assignmentDTO.getAssignedDate()));
+        } catch (ParseException e) {
+            throw new RuntimeException("Parse date error");
+        }
 
         if (assignTo.getLocation() != assignBy.getLocation()) {
             throw new ConflictException("The location of assignTo difference from admin!");
@@ -105,16 +109,26 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @Override
     public AssignmentDTO update(AssignmentDTO assignmentDTO) {
-        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-        String checkDate = checkDate(format.format(assignmentDTO.getAssignedDate()));
-        if (!checkDate.equals("")) {
-            throw new DateTimeException(checkDate);
-        }
         AssignmentEntity assignment = assignmentRepository.findById(assignmentDTO.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Assignment not found!"));
         if (assignment.getState() != AssignmentState.WAITING_FOR_ACCEPTANCE) {
             throw new ConflictException("Assignment is editable while in state Waiting for acceptance!");
         }
+
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        Date todayDate = null;
+        Date assignedDate = null;
+        try {
+            todayDate = dateFormatter.parse(dateFormatter.format(new Date()));
+            assignedDate = dateFormatter.parse(dateFormatter.format(assignmentDTO.getAssignedDate()));
+        } catch (ParseException e) {
+            throw new RuntimeException("Parse date error");
+        }
+
+        if(assignedDate.before(todayDate)) {
+            throw new ConflictException("The assigned date is current or future!");
+        }
+
         UsersEntity assignTo = assignment.getAssignTo();
         UsersEntity assignBy;
 
@@ -205,22 +219,5 @@ public class AssignmentServiceImpl implements AssignmentService {
         assignment.setAssetEntity(asset);
         assignment.setState(state);
         return AssignmentDTO.toDTO(assignmentRepository.save(assignment));
-    }
-    private String checkDate(String date) {
-        Date currentDate = new Date();
-        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-        format.setLenient(false);
-        Date assignedDate = new Date();
-        try {
-            assignedDate = format.parse(date);
-        } catch (Exception ex) {
-            return "Wrong date! (dd/MM/yyyy)";
-        }
-
-        long diff = TimeUnit.DAYS.convert(assignedDate.getTime() - currentDate.getTime(), TimeUnit.MILLISECONDS);
-        if (diff < 0) {
-            return "Assigned Date need to be equal or bigger than current date";
-        }
-        return "";
     }
 }
