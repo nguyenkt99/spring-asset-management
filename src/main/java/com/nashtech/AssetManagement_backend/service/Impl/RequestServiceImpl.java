@@ -11,6 +11,7 @@ import com.nashtech.AssetManagement_backend.repository.RequestRepository;
 import com.nashtech.AssetManagement_backend.repository.UserRepository;
 import com.nashtech.AssetManagement_backend.service.RequestService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -29,6 +30,8 @@ public class RequestServiceImpl implements RequestService {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    JavaMailSender javaMailSender;
     @Override
     public RequestDTO create(RequestDTO requestDTO) {
         RequestEntity request = requestDTO.toEntity();

@@ -12,6 +12,8 @@ import com.nashtech.AssetManagement_backend.service.AssignmentService;
 import com.nashtech.AssetManagement_backend.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -34,6 +36,8 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Autowired
     UserService userService;
 
+    @Autowired
+    JavaMailSender javaMailSender;
     @Override
     public List<AssignmentDTO> getAllByAdmimLocation(String username) {
         Location location = userService.findByUserName(username).getLocation();
@@ -59,11 +63,11 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @Override
     public AssignmentDTO save(AssignmentDTO assignmentDTO) {
-        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-        String checkDate = checkDate(format.format(assignmentDTO.getAssignedDate()));
-        if (!checkDate.equals("")) {
-            throw new DateTimeException(checkDate);
-        }
+            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+            String checkDate = checkDate(format.format(assignmentDTO.getAssignedDate()));
+            if (!checkDate.equals("")) {
+                throw new DateTimeException(checkDate);
+            }
         AssignmentEntity assignment = AssignmentDTO.toEntity(assignmentDTO);
         UsersEntity assignTo = userRepository.findByUserName(assignmentDTO.getAssignedTo())
                 .orElseThrow(() -> new ResourceNotFoundException("AssignTo not found!"));
@@ -87,7 +91,15 @@ public class AssignmentServiceImpl implements AssignmentService {
         assignment.setAssignBy(assignBy);
         if (assignmentDTO.getAssignedDate() == null)
             assignment.setAssignedDate(new Date());
-
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setTo(assignTo.getEmail());
+        msg.setSubject("New assignment assigned to you");
+        msg.setText("Your administrator has assigned you a new assignment: \nAsset " +
+                "code: "+assignment.getAssetEntity().getAssetCode()+
+                "\nAsset name: "+ assignment.getAssetEntity().getAssetName()+
+                "\nDate: "+format.format(assignment.getAssignedDate())+
+                "\nPlease check your assignment by your account\nKind Regards,\nAdministrator");
+        javaMailSender.send(msg);
         return AssignmentDTO.toDTO(assignmentRepository.save(assignment));
     }
 
@@ -140,7 +152,16 @@ public class AssignmentServiceImpl implements AssignmentService {
         assignment.setNote(assignmentDTO.getNote());
         if (assignmentDTO.getAssignedDate() != null)
             assignment.setAssignedDate(assignmentDTO.getAssignedDate());
-
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setTo(assignTo.getEmail());
+        msg.setSubject("Your assignment has been update by Administrator");
+        msg.setText("Your administrator has been update your assignment: "+
+                "\nAssignment code: "+assignment.getId()+
+                "\nAsset code: "+assignment.getAssetEntity().getAssetCode()+
+                "\nAsset name: "+ assignment.getAssetEntity().getAssetName()+
+                "\nDate: "+format.format(assignment.getAssignedDate())+
+                "\nPlease check your assignment by your account\nKind Regards,\nAdministrator");
+        javaMailSender.send(msg);
         return AssignmentDTO.toDTO(assignmentRepository.save(assignment));
     }
 
