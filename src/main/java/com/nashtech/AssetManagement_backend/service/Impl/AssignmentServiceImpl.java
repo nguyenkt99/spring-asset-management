@@ -183,13 +183,13 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
     private String checkDate(String date) {
         Date currentDate = new Date();
-        SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
         format.setLenient(false);
         Date assignedDate = new Date();
         try {
             assignedDate = format.parse(date);
         } catch (Exception ex) {
-            return "Wrong date! (MM/dd/yyyy)";
+            return "Wrong date! (dd/MM/yyyy)";
         }
 
         long diff = TimeUnit.DAYS.convert(assignedDate.getTime() - currentDate.getTime(), TimeUnit.MILLISECONDS);
