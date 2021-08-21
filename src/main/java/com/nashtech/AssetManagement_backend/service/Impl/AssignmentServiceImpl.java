@@ -59,7 +59,7 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @Override
     public AssignmentDTO save(AssignmentDTO assignmentDTO) {
-        SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
         String checkDate = checkDate(format.format(assignmentDTO.getAssignedDate()));
         if (!checkDate.equals("")) {
             throw new DateTimeException(checkDate);
@@ -93,7 +93,7 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @Override
     public AssignmentDTO update(AssignmentDTO assignmentDTO) {
-        SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
         String checkDate = checkDate(format.format(assignmentDTO.getAssignedDate()));
         if (!checkDate.equals("")) {
             throw new DateTimeException(checkDate);
