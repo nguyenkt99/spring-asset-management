@@ -1,58 +1,65 @@
 package com.nashtech.AssetManagement_backend.service.Impl;
 
 import com.nashtech.AssetManagement_backend.dto.ReportDTO;
-import com.nashtech.AssetManagement_backend.dto.StateCounterData;
+import com.nashtech.AssetManagement_backend.dto.StateQuantity;
 import com.nashtech.AssetManagement_backend.entity.CategoryEntity;
+import com.nashtech.AssetManagement_backend.entity.Location;
 import com.nashtech.AssetManagement_backend.repository.AssetRepository;
 import com.nashtech.AssetManagement_backend.repository.CategoryRepository;
+import com.nashtech.AssetManagement_backend.repository.UserRepository;
 import com.nashtech.AssetManagement_backend.service.ReportService;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+
 @Service
 public class ReportServiceImpl implements ReportService {
-    private final CategoryRepository categoryRepository;
-    private final AssetRepository assetRepository;
+    @Autowired
+    CategoryRepository categoryRepository;
 
+    @Autowired
+    AssetRepository assetRepository;
 
-    public ReportServiceImpl(CategoryRepository categoryRepository, AssetRepository assetRepository) {
-        this.categoryRepository = categoryRepository;
-        this.assetRepository = assetRepository;
-    }
+    @Autowired
+    UserRepository userRepository;
+
     @Override
-    public ResponseEntity<?> getAll() {
-        List<CategoryEntity> categoryList = categoryRepository.findAll();
-        List<ReportDTO> reportDTOList = new ArrayList<>();
-        for(int i = 0; i< categoryList.size();i++){
-            reportDTOList.add(getReport(categoryList.get(i)));
+    public List<ReportDTO> getReport(String username) {
+        Location location = userRepository.findByUserName(username).get().getLocation();
+        List<CategoryEntity> categories = categoryRepository.findAll();
+        List<ReportDTO> reportList = new ArrayList<>();
+        for(CategoryEntity category : categories) {
+            reportList.add(getReportByCategory(category, location));
         }
-        return ResponseEntity.ok(reportDTOList);
+        return reportList;
     }
 
-    private ReportDTO getReport(CategoryEntity category){
-        ReportDTO dto = new ReportDTO(category.getName(),
-                assetRepository.countAllByCategoryEntity(category),
-                0,0,0,0,0);
-        List<StateCounterData> counters = assetRepository.countState(category.getId());
-        if(counters.size()<=0){
-            return dto;
-        }
-        for (int i=0;i<counters.size();i++){
-            switch (counters.get(i).getState()){
-                case "AVAILABLE": dto.setAvailable(counters.get(i).getCount());
+    private ReportDTO getReportByCategory(CategoryEntity category, Location location) {
+        ReportDTO report = new ReportDTO(category.getName(), 0, 0, 0, 0, 0, 0);
+        List<StateQuantity> stateQuantityList = assetRepository.countState(category.getId(), location.toString());
+
+        report.setTotal(assetRepository.countByCategoryEntityAndLocation(category, location));
+        for(StateQuantity stateQuantity : stateQuantityList) {
+            switch (stateQuantity.getState()) {
+                case "AVAILABLE":
+                    report.setAvailable(stateQuantity.getQuantity());
                     break;
-                case "NOT_AVAILABLE": dto.setNotAvailable(counters.get(i).getCount());
+                case "NOT_AVAILABLE":
+                    report.setNotAvailable(stateQuantity.getQuantity());
                     break;
-                case "ASSIGNED": dto.setAssigned(counters.get(i).getCount());
+                case "ASSIGNED":
+                    report.setAssigned(stateQuantity.getQuantity());
                     break;
-                case "WAITING_FOR_RECYCLING": dto.setWaitingForRecycle(counters.get(i).getCount());
+                case "WAITING_FOR_RECYCLING":
+                    report.setWaitingForRecycle(stateQuantity.getQuantity());
                     break;
-                case "RECYCLED": dto.setRecycled(counters.get(i).getCount());
+                case "RECYCLED":
+                    report.setRecycled(stateQuantity.getQuantity());
                     break;
             }
         }
-        return dto;
+        return report;
     }
 }

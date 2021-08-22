@@ -1,6 +1,6 @@
 package com.nashtech.AssetManagement_backend.dto;
 
-public interface StateCounterData {
+public interface StateQuantity {
     String getState();
-    int getCount();
+    Integer getQuantity();
 }

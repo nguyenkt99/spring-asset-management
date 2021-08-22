@@ -1,6 +1,7 @@
 package com.nashtech.AssetManagement_backend.service;
 
 import com.nashtech.AssetManagement_backend.dto.AssetDTO;
+import com.nashtech.AssetManagement_backend.entity.CategoryEntity;
 
 import java.util.List;
 
@@ -18,4 +19,6 @@ public interface AssetService {
     Boolean delete(String assetCode);
 
     AssetDTO update(AssetDTO dto);
+
+    int countByCategory(Long categoryId, String username);
 }

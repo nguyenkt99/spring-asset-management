@@ -45,9 +45,22 @@ public class AssignmentServiceImpl implements AssignmentService {
         return assignmentDTOs;
     }
 
+//    @Override
+//    public List<AssignmentDTO> getAssignmentsByUser(String username) {
+//        List<AssignmentDTO> assignmentDTOs = assignmentRepository.findAssignmentsByUser(username)
+//                .stream().map(AssignmentDTO::toDTO).collect(Collectors.toList());
+//        assignmentDTOs.sort(Comparator.comparing(AssignmentDTO::getId));
+//        return assignmentDTOs;
+//    }
+
     @Override
     public List<AssignmentDTO> getAssignmentsByUser(String username) {
-        List<AssignmentDTO> assignmentDTOs = assignmentRepository.findAssignmentsByUser(username)
+        UsersEntity user = userRepository.findByUserName(username).get();
+        List<AssignmentState> states = new ArrayList<>();
+        states.add(AssignmentState.WAITING_FOR_ACCEPTANCE);
+        states.add(AssignmentState.ACCEPTED);
+//        states.add(AssignmentState.CANCELED_ASSIGN);
+        List<AssignmentDTO> assignmentDTOs = assignmentRepository.findByAssignTo_StaffCodeAndAssignedDateIsLessThanEqualAndStateIn(user.getStaffCode(), new Date(), states)
                 .stream().map(AssignmentDTO::toDTO).collect(Collectors.toList());
         assignmentDTOs.sort(Comparator.comparing(AssignmentDTO::getId));
         return assignmentDTOs;
@@ -78,12 +91,14 @@ public class AssignmentServiceImpl implements AssignmentService {
             throw new RuntimeException("Parse date error");
         }
 
-        if (assignTo.getLocation() != assignBy.getLocation()) {
-            throw new ConflictException("The location of assignTo difference from admin!");
-        }
         if(assignedDate.before(todayDate)) {
             throw new ConflictException("The assigned date is current or future!");
         }
+
+        if (assignTo.getLocation() != assignBy.getLocation()) {
+            throw new ConflictException("The location of assignTo difference from admin!");
+        }
+
         AssetEntity asset = assetRepository.findById(assignmentDTO.getAssetCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Asset not found!"));
         if (asset.getState() != AssetState.AVAILABLE) {

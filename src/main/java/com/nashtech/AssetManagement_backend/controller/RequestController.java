@@ -30,7 +30,7 @@ public class RequestController {
         return requestService.getAllByAdminLocation(request.getAttribute("userName").toString());
     }
 
-    @PatchMapping("/{requestId}")
+    @PutMapping("/{requestId}")
     public ResponseEntity<Void> acceptRequest(@PathVariable("requestId") Long requestId) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();

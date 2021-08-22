@@ -104,4 +104,11 @@ public class AssetServiceImpl implements AssetService {
         asset.setState(dto.getState());
         return AssetDTO.toDTO(assetRepo.save(asset));
     }
+
+    @Override
+    public int countByCategory(Long categoryId, String username) {
+        Location location = userRepo.findByUserName(username).get().getLocation();
+        CategoryEntity category = categoryRepo.findById(categoryId).get();
+        return assetRepo.countByCategoryEntityAndLocation(category, location);
+    }
 }

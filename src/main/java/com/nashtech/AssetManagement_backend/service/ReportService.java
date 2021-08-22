@@ -1,7 +1,9 @@
 package com.nashtech.AssetManagement_backend.service;
 
-import org.springframework.http.ResponseEntity;
+import com.nashtech.AssetManagement_backend.dto.ReportDTO;
+
+import java.util.List;
 
 public interface ReportService {
-    ResponseEntity<?> getAll();
+    List<ReportDTO> getReport(String username);
 }
