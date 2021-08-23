@@ -4,10 +4,13 @@ package com.nashtech.AssetManagement_backend.controller;
 import com.nashtech.AssetManagement_backend.dto.UserDto;
 import com.nashtech.AssetManagement_backend.entity.Location;
 import com.nashtech.AssetManagement_backend.repository.UserRepository;
+import com.nashtech.AssetManagement_backend.security.services.UserDetailsImpl;
 import com.nashtech.AssetManagement_backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -45,12 +48,7 @@ public class UserController {
     }
 
     @GetMapping("/{staffCode}")
-    public ResponseEntity<UserDto> getUserById(HttpServletRequest request,
-
-                                               @PathVariable("staffCode") String staffCode) {
-
-
-
+    public ResponseEntity<UserDto> getUserById(HttpServletRequest request, @PathVariable("staffCode") String staffCode) {
         String userName = (String) request.getAttribute("userName");
         Location location = userService.getLocationByUserName(userName);
 
@@ -58,7 +56,13 @@ public class UserController {
         return new ResponseEntity<>(userDto, HttpStatus.OK);
 
     }
-
+    @GetMapping("/staff")
+    public ResponseEntity<?> getUserInfo(Authentication authentication) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        Location location = userService.getLocationByUserName(userDetails.getUsername());
+        UserDto userDto = userService.getUserByStaffCode(userDetails.getStaffCode(), location);
+        return new ResponseEntity<>(userDto, HttpStatus.OK);
+    }
 
 //    {
 //        "firstName": "Tan",
