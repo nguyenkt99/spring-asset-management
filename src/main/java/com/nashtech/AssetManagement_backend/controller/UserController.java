@@ -1,13 +1,11 @@
 package com.nashtech.AssetManagement_backend.controller;
 
-
 import com.nashtech.AssetManagement_backend.dto.UserDto;
 import com.nashtech.AssetManagement_backend.entity.Location;
 import com.nashtech.AssetManagement_backend.repository.UserRepository;
 import com.nashtech.AssetManagement_backend.security.services.UserDetailsImpl;
 import com.nashtech.AssetManagement_backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -24,25 +22,16 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-
     @Autowired
     private UserService userService;
     @Autowired
     private UserRepository userRepository;
 
-
     @GetMapping("")
     public ResponseEntity<List<UserDto>> getAll (HttpServletRequest request) {
-
-
-
-
         String userName = (String) request.getAttribute("userName");
         Location location = userService.getLocationByUserName(userName);
-
         List<UserDto> userDtos = userService.retrieveUsers(location);
-
-
 
         return new ResponseEntity<>(userDtos, HttpStatus.OK);
     }
@@ -51,38 +40,26 @@ public class UserController {
     public ResponseEntity<UserDto> getUserById(HttpServletRequest request, @PathVariable("staffCode") String staffCode) {
         String userName = (String) request.getAttribute("userName");
         Location location = userService.getLocationByUserName(userName);
-
         UserDto userDto = userService.getUserByStaffCode(staffCode, location);
-        return new ResponseEntity<>(userDto, HttpStatus.OK);
 
+        return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
-    @GetMapping("/staff")
-    public ResponseEntity<?> getUserInfo(Authentication authentication) {
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile(Authentication authentication) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        Location location = userService.getLocationByUserName(userDetails.getUsername());
-        UserDto userDto = userService.getUserByStaffCode(userDetails.getStaffCode(), location);
+        UserDto userDto = userService.getProfile(userDetails.getUsername());
         return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
-
-//    {
-//        "firstName": "Tan",
-//            "lastName": "Vo Dinh",
-//            "gender": "Male",
-//            "location": "HCM",
-//            "dateOfBirth": "2020-01-01T12:00:27.87+00:20",
-//            "joinedDate": "2020-01-01T12:00:27.87+00:20",
-//            "role": "Staff"
-//    }
 
     @PostMapping("")
     public ResponseEntity<UserDto> addUser( HttpServletRequest request, @Valid @RequestBody UserDto userDto) throws ParseException {
-
         String userName = (String) request.getAttribute("userName");
         //set location staff = location admin create;
         userDto.setLocation(userRepository.findByUserName(userName).get().getLocation());
         return new ResponseEntity<>(userService.saveUser(userDto), HttpStatus.CREATED);
-
     }
+
     @PutMapping("/{staffCode}")
     public ResponseEntity<UserDto> editUser(@PathVariable("staffCode") String staffCode, @RequestBody UserDto userDto) {
         userDto.setStaffCode(staffCode);
@@ -90,13 +67,9 @@ public class UserController {
         return new ResponseEntity<>(updateUser, HttpStatus.OK);
     }
 
-
     @DeleteMapping("/{staffCode}")
-    public ResponseEntity<Map<String, Boolean>> deleteCategory(HttpServletRequest request,
-                                                               @PathVariable("staffCode") String staffCode)  {
-
+    public ResponseEntity<Map<String, Boolean>> deleteCategory(HttpServletRequest request, @PathVariable("staffCode") String staffCode)  {
         userService.deleteUser(staffCode);
-
         Map<String, Boolean> map = new HashMap<>();
         map.put("success", true);
         return new ResponseEntity<>(map, HttpStatus.OK);

@@ -192,6 +192,13 @@ public class UserServiceImpl implements UserService {
         return true;
     }
 
+    @Override
+    public UserDto getProfile(String username) {
+        UsersEntity user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
+        return new UserDto().toDto(user);
+    }
+
     // number ranges from 1 (Sunday) to 7 (Saturday)
     private int getDayNumberOld(Date date) {
         Calendar cal = Calendar.getInstance();

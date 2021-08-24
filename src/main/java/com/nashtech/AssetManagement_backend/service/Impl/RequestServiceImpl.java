@@ -50,6 +50,11 @@ public class RequestServiceImpl implements RequestService {
         }
 
         UsersEntity requestBy = userRepository.getByUserName(requestDTO.getRequestBy());
+        if(!requestBy.getRole().getName().equals(RoleName.ROLE_ADMIN)) { // requestedBy is not admin
+            if(!requestBy.equals(assignment.getAssignTo())) { // requestedBy is also not assignedTo
+                throw new ConflictException("RequestedBy must be admin or assignee!");
+            }
+        }
 
         request.setRequestedDate(new Date());
         request.setAssignmentEntity(assignment);
@@ -59,14 +64,15 @@ public class RequestServiceImpl implements RequestService {
         {
             SimpleMailMessage msg = new SimpleMailMessage();
             msg.setTo(assignment.getAssignTo().getEmail());
-            msg.setSubject("Returning asset");
+            msg.setSubject("Returning Asset");
             msg.setText("Your administrator need you to return assets to the company: " +
                     "" +
                     "\nAsset" +
                     " " +
-                    "code: "+assignment.getAssetEntity().getAssetCode()+
-                    "\nAsset name: "+ assignment.getAssetEntity().getAssetName()+
-                    "\nDate: "+format.format(request.getReturnedDate())+
+                    "code: " + assignment.getAssetEntity().getAssetCode()+
+                    "\nAsset name: " + assignment.getAssetEntity().getAssetName()+
+                    "\nRequested Date: " + format.format(request.getRequestedDate())+
+                    "\nYou must return it within 3 days." +
                     "\nPlease check your request by your account\nKind Regards," +
                     "\nAdministrator");
             javaMailSender.send(msg);

@@ -11,6 +11,7 @@ import com.nashtech.AssetManagement_backend.security.services.UserDetailsService
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -69,19 +70,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
-
-    
-
-
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable().exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
-                .antMatchers("/api/assignment").hasRole("ADMIN")
-                .antMatchers("/api/assignment/home").hasAnyRole("ADMIN", "STAFF")
                 .antMatchers("/api/auth/**").permitAll()
-                .antMatchers("/api/users/staff").hasRole( "STAFF")
-                .antMatchers("/api/users/**").hasRole( "ADMIN")
+                .antMatchers("/api/assignment/home", "/api/users/profile").hasAnyRole("ADMIN", "STAFF")
+                .antMatchers(HttpMethod.POST, "/api/request").hasAnyRole("ADMIN", "STAFF")
+                .antMatchers("/api/role", "/api/users/**", "/api/category", "/api/asset/**", "/api/assignment/**",
+                        "/api/request", "/api/report").hasRole("ADMIN")
                 .anyRequest().authenticated();
 
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

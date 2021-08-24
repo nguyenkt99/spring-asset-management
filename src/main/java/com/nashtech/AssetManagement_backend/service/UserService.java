@@ -36,4 +36,6 @@ public interface UserService {
 
     Boolean disableUser(String staffCode);
 
+    UserDto getProfile(String username);
+
 }
