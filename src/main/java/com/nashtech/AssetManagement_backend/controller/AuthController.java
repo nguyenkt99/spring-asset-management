@@ -6,13 +6,10 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import com.nashtech.AssetManagement_backend.dto.UserDto;
-import com.nashtech.AssetManagement_backend.entity.UsersEntity;
 import com.nashtech.AssetManagement_backend.payload.request.ChangePasswordRequest;
 import com.nashtech.AssetManagement_backend.payload.request.LoginRequest;
 import com.nashtech.AssetManagement_backend.service.AuthService;
 
-import com.nashtech.AssetManagement_backend.service.OTPService;
-import com.nashtech.AssetManagement_backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -43,11 +40,10 @@ public class AuthController {
     @ResponseBody
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String,Object> email,@RequestParam("OTP") int OTP) {
         Map<String,String> map=new HashMap<>();
-        if(authService.vaildOTP(email.get("email").toString(),OTP))
+        if(authService.validOTP(email.get("email").toString(),OTP))
         {
             map.put("message","Your new password has been sent to your email");
             return ResponseEntity.ok(map);
-
         }else
         {
             map.put("message","Something went wrong");
@@ -64,7 +60,7 @@ public class AuthController {
         {
             map.put("status","false");
             map.put("message","Account not found");
-            return ResponseEntity.badRequest().body(map);
+            return ResponseEntity.ok(map);
         }else
         {
             map.put("status","true");

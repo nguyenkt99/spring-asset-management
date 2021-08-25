@@ -131,7 +131,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Boolean vaildOTP(String email, int OTP) {
+    public Boolean validOTP(String email, int OTP) {
 
         UsersEntity entity = userService.findByEmail(email);
         if (OTP >= 0) {

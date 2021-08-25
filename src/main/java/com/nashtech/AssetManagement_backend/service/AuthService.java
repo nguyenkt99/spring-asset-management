@@ -9,6 +9,6 @@ public interface AuthService {
     ResponseEntity<?> authenticateUser(LoginRequest loginRequest);
     UserDto changePasswordAfterfirstLogin(String username, String password);
     Boolean changepassword(String username, String oldPassword, String newPassword);
-    Boolean vaildOTP(String email,int OTP);
+    Boolean validOTP(String email, int OTP);
     Boolean getOTP(String email);
 }
