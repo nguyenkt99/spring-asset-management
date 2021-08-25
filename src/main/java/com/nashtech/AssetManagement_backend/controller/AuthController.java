@@ -60,7 +60,7 @@ public class AuthController {
         {
             map.put("status","false");
             map.put("message","Account not found");
-            return ResponseEntity.ok(map);
+            return ResponseEntity.badRequest().body(map);
         }else
         {
             map.put("status","true");
