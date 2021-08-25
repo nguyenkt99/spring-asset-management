@@ -12,6 +12,7 @@ import com.nashtech.AssetManagement_backend.exception.ResourceNotFoundException;
 import com.nashtech.AssetManagement_backend.handleException.NotFoundExecptionHandle;
 import com.nashtech.AssetManagement_backend.repository.RoleRepository;
 import com.nashtech.AssetManagement_backend.repository.UserRepository;
+import com.nashtech.AssetManagement_backend.service.OTPService;
 import com.nashtech.AssetManagement_backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -31,7 +32,6 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     UserRepository userRepository;
-
     @Autowired
     RoleRepository roleRepository;
 

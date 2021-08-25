@@ -12,6 +12,7 @@ import com.nashtech.AssetManagement_backend.payload.response.JwtResponse;
 import com.nashtech.AssetManagement_backend.security.jwt.JwtUtils;
 import com.nashtech.AssetManagement_backend.security.services.UserDetailsImpl;
 import com.nashtech.AssetManagement_backend.service.AuthService;
+import com.nashtech.AssetManagement_backend.service.OTPService;
 import com.nashtech.AssetManagement_backend.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,9 @@ public class AuthServiceImpl implements AuthService {
     private final UserService userService;
     private final JavaMailSender javaMailSender;
     @Autowired
+    OTPService otpService;
+
+    @Autowired
     AuthServiceImpl(AuthenticationManager authenticationManager, JwtUtils jwtUtils,
                     PasswordEncoder encoder, UserService userService, JavaMailSender javaMailSender) {
         this.authenticationManager = authenticationManager;
@@ -51,7 +55,7 @@ public class AuthServiceImpl implements AuthService {
         // authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
         // on this step, we tell to authenticationManager how we load data from database
         // and the password encoder
-        
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
@@ -82,7 +86,7 @@ public class AuthServiceImpl implements AuthService {
             statusCode = result.getStatusCode();
             if (statusCode == HttpStatus.OK) {
                 String passwordEncode = encoder.encode(newPassword);
-                if(userService.changePassword(username, passwordEncode) != null)
+                if (userService.changePassword(username, passwordEncode) != null)
                     return true;
                 return false;
             }
@@ -91,16 +95,21 @@ public class AuthServiceImpl implements AuthService {
         }
         return false;
     }
- @Override
-    public String getOTP(String email) {
+
+    @Override
+    public Boolean getOTP(String email) {
         UsersEntity entity = userService.findByEmail(email);
-        String OTP=getRandomNumberString();
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(email);
-        msg.setSubject("Your OTP is");
-        msg.setText("Your OTP is "+OTP);
-        javaMailSender.send(msg);
-        return OTP;
+        if (entity != null) {
+            int OTP = otpService.generateOTP(entity.getUserName());
+            SimpleMailMessage msg = new SimpleMailMessage();
+            msg.setTo(email);
+            msg.setSubject("Your OTP is");
+            msg.setText("Your OTP is " + OTP);
+            javaMailSender.send(msg);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public static String getRandomNumberString() {
@@ -112,6 +121,7 @@ public class AuthServiceImpl implements AuthService {
         // this will convert any number sequence into 6 character.
         return String.format("%06d", number);
     }
+
     public static String getRandomPassword() {
 
         Random rnd = new Random();
@@ -119,21 +129,37 @@ public class AuthServiceImpl implements AuthService {
 
         return String.format("%08d", number);
     }
+
     @Override
-    public Boolean forgotpassword(String email) {
+    public Boolean vaildOTP(String email, int OTP) {
+
         UsersEntity entity = userService.findByEmail(email);
-        String pass=getRandomPassword();
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(email);
-        msg.setSubject("Your password is");
-        msg.setText("Your password is "+pass);
-        try{
-            changePasswordAfterfirstLogin(entity.getUserName(),pass);
-            javaMailSender.send(msg);
-            return true;
-        }catch (Exception e)
-        {
+        if (OTP >= 0) {
+            int serverOtp = otpService.getOtp(entity.getUserName());
+            if (serverOtp > 0) {
+                if (OTP == serverOtp) {
+                    otpService.clearOTP(entity.getUserName());
+                    String pass=getRandomPassword();
+                    SimpleMailMessage msg = new SimpleMailMessage();
+                    msg.setTo(email);
+                    msg.setSubject("Your password is");
+                    msg.setText("Your password is "+pass);
+                    try{
+                        changePasswordAfterfirstLogin(entity.getUserName(),pass);
+                        javaMailSender.send(msg);
+                        return true;
+                    }catch (Exception e)
+                    {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
             return false;
         }
-
-    }}
+    }
+}
