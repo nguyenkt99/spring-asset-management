@@ -1,10 +1,7 @@
 package com.nashtech.AssetManagement_backend.service.Impl;
 
 import com.nashtech.AssetManagement_backend.dto.UserDto;
-import com.nashtech.AssetManagement_backend.entity.Location;
-import com.nashtech.AssetManagement_backend.entity.RolesEntity;
-import com.nashtech.AssetManagement_backend.entity.UserState;
-import com.nashtech.AssetManagement_backend.entity.UsersEntity;
+import com.nashtech.AssetManagement_backend.entity.*;
 import com.nashtech.AssetManagement_backend.exception.BadRequestException;
 import com.nashtech.AssetManagement_backend.exception.ConflictException;
 import com.nashtech.AssetManagement_backend.exception.InvalidInputException;
@@ -29,27 +26,23 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class UserServiceImpl implements UserService {
-
     @Autowired
     UserRepository userRepository;
+
     @Autowired
     RoleRepository roleRepository;
-
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-    }
 
     @Override
     public UsersEntity findByUserName(String username) {
         return userRepository.findByUserName(username)
                 .orElseThrow(() -> new NotFoundExecptionHandle("Could not found user: " + username));
     }
-@Override
-    public UsersEntity findByEmail(String email)
-    {
+
+    @Override
+    public UsersEntity findByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(()-> new NotFoundExecptionHandle("Could not found user: " + email));
     }
+
     @Override
     public UserDto changePasswordAfterfirstLogin(String username, String passwordEncode) {
         UsersEntity existUser = findByUserName(username);
@@ -159,13 +152,13 @@ public class UserServiceImpl implements UserService {
         return new UserDto().toDto(user);
     }
 
-    @Override
-    public String deleteUser(String staffCode) throws ResourceNotFoundException {
-        userRepository.findByStaffCode(staffCode)
-                .orElseThrow(() -> new ResourceNotFoundException("user not found for this staff code: " + staffCode));
-        userRepository.deleteByStaffCode(staffCode);
-        return "deleted";
-    }
+//    @Override
+//    public String deleteUser(String staffCode) throws ResourceNotFoundException {
+//        userRepository.findByStaffCode(staffCode)
+//                .orElseThrow(() -> new ResourceNotFoundException("user not found for this staff code: " + staffCode));
+//        userRepository.deleteByStaffCode(staffCode);
+//        return "deleted";
+//    }
 
     public Location getLocationByUserName(String userName) {
         return userRepository.getByUserName(userName).getLocation();
@@ -176,16 +169,34 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Boolean canDisableUser(String staffCode) {
-        return !(userRepository.findByStaffCode(staffCode)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND)).getAssignmentsBys().size() > 0);
+//        return !(userRepository.findByStaffCode(staffCode)
+//                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND)).getAssignmentsBys().size() > 0);
+
+        UsersEntity usersEntity = userRepository.findByStaffCode(staffCode)
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
+        for(AssignmentEntity assignment : usersEntity.getAssignmentTos()) {
+            if(assignment.getState().equals(AssignmentState.WAITING_FOR_ACCEPTANCE) ||
+                    assignment.getState().equals(AssignmentState.ACCEPTED)) {
+                throw new ConflictException(DISABLE_CONFLICT);
+            }
+        }
+        return true;
     }
 
     @Override
     public Boolean disableUser(String staffCode) {
         UsersEntity usersEntity = userRepository.findByStaffCode(staffCode)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
-        if (usersEntity.getAssignmentTos().size() > 0) {
-            throw new ConflictException(DISABLE_CONFLICT);
+//        if (usersEntity.getAssignmentTos().size() > 0) {
+//            throw new ConflictException(DISABLE_CONFLICT);
+//        }
+
+        // admin cannot disable user when user has assignment in WAITING_FOR_ACCEPTANCE or ACCEPTED state
+        for(AssignmentEntity assignment : usersEntity.getAssignmentTos()) {
+            if(assignment.getState().equals(AssignmentState.WAITING_FOR_ACCEPTANCE) ||
+                    assignment.getState().equals(AssignmentState.ACCEPTED)) {
+                throw new ConflictException(DISABLE_CONFLICT);
+            }
         }
         usersEntity.setState(UserState.Disabled);
         userRepository.save(usersEntity);
