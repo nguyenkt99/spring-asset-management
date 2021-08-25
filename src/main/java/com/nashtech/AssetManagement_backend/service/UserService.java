@@ -28,7 +28,7 @@ public interface UserService {
 
     public UserDto updateUser(UserDto userDto);
 
-    public String deleteUser(String staffCode) throws ResourceNotFoundException;
+//    public String deleteUser(String staffCode) throws ResourceNotFoundException;
 
     public Location getLocationByUserName(String userName);
 

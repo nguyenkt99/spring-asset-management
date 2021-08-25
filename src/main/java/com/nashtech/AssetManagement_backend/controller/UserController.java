@@ -67,20 +67,20 @@ public class UserController {
         return new ResponseEntity<>(updateUser, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{staffCode}")
-    public ResponseEntity<Map<String, Boolean>> deleteCategory(HttpServletRequest request, @PathVariable("staffCode") String staffCode)  {
-        userService.deleteUser(staffCode);
-        Map<String, Boolean> map = new HashMap<>();
-        map.put("success", true);
-        return new ResponseEntity<>(map, HttpStatus.OK);
-    }
+//    @DeleteMapping("/{staffCode}")
+//    public ResponseEntity<Map<String, Boolean>> deleteCategory(HttpServletRequest request, @PathVariable("staffCode") String staffCode)  {
+//        userService.deleteUser(staffCode);
+//        Map<String, Boolean> map = new HashMap<>();
+//        map.put("success", true);
+//        return new ResponseEntity<>(map, HttpStatus.OK);
+//    }
 
     @GetMapping("/disable/{staffCode}")
     public ResponseEntity<Boolean> canDisableUser(@PathVariable("staffCode") String staffCode){
         return ResponseEntity.ok().body(userService.canDisableUser(staffCode));
     }
 
-    @PostMapping("/disable/{staffCode}")
+    @PutMapping("/disable/{staffCode}")
     public ResponseEntity<Boolean> disableUser(@PathVariable("staffCode") String staffCode){
         return ResponseEntity.ok().body(userService.disableUser(staffCode));
     }
