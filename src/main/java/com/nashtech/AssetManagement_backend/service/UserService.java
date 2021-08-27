@@ -2,6 +2,7 @@ package com.nashtech.AssetManagement_backend.service;
 
 import com.nashtech.AssetManagement_backend.dto.UserDto;
 import com.nashtech.AssetManagement_backend.entity.Location;
+import com.nashtech.AssetManagement_backend.entity.LocationEntity;
 import com.nashtech.AssetManagement_backend.entity.UsersEntity;
 import com.nashtech.AssetManagement_backend.exception.BadRequestException;
 import com.nashtech.AssetManagement_backend.exception.ResourceNotFoundException;
@@ -18,23 +19,23 @@ public interface UserService {
 
     UserDto changePassword(String username, String passwordEncode);
 
-    public UserDto saveUser(UserDto userDto) throws BadRequestException;
+    UserDto saveUser(UserDto userDto, String username) throws BadRequestException;
 
-    public List<UserDto> retrieveUsers(Location location);
+    List<UserDto> retrieveUsers(LocationEntity location);
 
-    public List<UserDto> retrieveUsers(Pageable pageable);
+    List<UserDto> retrieveUsers(Pageable pageable);
 
-    public UserDto getUserByStaffCode(String staffCode, Location location) throws ResourceNotFoundException;
+    UserDto getUserById(String id, LocationEntity location) throws ResourceNotFoundException;
 
-    public UserDto updateUser(UserDto userDto);
+    UserDto updateUser(UserDto userDto);
 
-//    public String deleteUser(String staffCode) throws ResourceNotFoundException;
+//    public String deleteUser(String id) throws ResourceNotFoundException;
 
-    public Location getLocationByUserName(String userName);
+    LocationEntity getLocationByUserName(String userName);
 
-    Boolean canDisableUser(String staffCode);
+    Boolean canDisableUser(String id);
 
-    Boolean disableUser(String staffCode);
+    Boolean disableUser(String id);
 
     UserDto getProfile(String username);
 

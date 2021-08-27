@@ -21,7 +21,6 @@ public class AssetCodeGenerator extends SequenceStyleGenerator {
 
     private String format;
 
-
     public static boolean isNumeric(String str) {
         try {
             Double.parseDouble(str);
@@ -37,20 +36,20 @@ public class AssetCodeGenerator extends SequenceStyleGenerator {
 
         int l = prefix.length()+ 6;
 
-        String QUERY = "from AssetEntity a where a.assetCode LIKE '"
-                + prefix + "%' and length(a.assetCode)='"+l+"' order by a.assetCode desc";
+        String QUERY = "from AssetEntity a where a.id LIKE '"
+                + prefix + "%' and length(a.id)='"+l+"' order by a.id desc";
 
 
         Query query = session.createQuery(QUERY);
         int id = 1;
         if (query.getResultList().size() > 0) {
 
-            System.out.println("__________________--"+((AssetEntity) query.getResultList().get(0)).getAssetCode());
+            System.out.println("__________________--"+((AssetEntity) query.getResultList().get(0)).getId());
 
-            if(isNumeric(((AssetEntity) query.getResultList().get(0)).getAssetCode()
+            if(isNumeric(((AssetEntity) query.getResultList().get(0)).getId()
                     .replace(prefix, ""))){
 
-                id = Integer.parseInt(((AssetEntity) query.getResultList().get(0)).getAssetCode()
+                id = Integer.parseInt(((AssetEntity) query.getResultList().get(0)).getId()
                         .replace(prefix, "")) + 1;
                 System.out.println("__________________--"+id);
             }

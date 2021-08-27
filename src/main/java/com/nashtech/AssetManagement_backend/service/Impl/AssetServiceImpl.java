@@ -1,10 +1,7 @@
 package com.nashtech.AssetManagement_backend.service.Impl;
 
 import com.nashtech.AssetManagement_backend.dto.AssetDTO;
-import com.nashtech.AssetManagement_backend.entity.AssetEntity;
-import com.nashtech.AssetManagement_backend.entity.AssetState;
-import com.nashtech.AssetManagement_backend.entity.CategoryEntity;
-import com.nashtech.AssetManagement_backend.entity.Location;
+import com.nashtech.AssetManagement_backend.entity.*;
 import com.nashtech.AssetManagement_backend.exception.BadRequestException;
 import com.nashtech.AssetManagement_backend.exception.ConflictException;
 import com.nashtech.AssetManagement_backend.exception.ResourceNotFoundException;
@@ -38,7 +35,7 @@ public class AssetServiceImpl implements AssetService {
     public AssetDTO create(AssetDTO dto, String username) {
         CategoryEntity cate = categoryRepo.findByPrefix(dto.getCategoryPrefix())
                 .orElseThrow(() -> new ResourceNotFoundException(CATEGORY_NOT_FOUND_ERROR));
-        Location location = userRepo.findByUserName(username)
+        LocationEntity location = userRepo.findByUserName(username)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_ERROR)).getLocation();
         if (dto.getState() != AssetState.NOT_AVAILABLE && dto.getState() != AssetState.AVAILABLE)
             throw new BadRequestException(ASSET_BAD_STATE_ERROR);
@@ -51,11 +48,11 @@ public class AssetServiceImpl implements AssetService {
     /// FIND ALL ASSETS
     @Override
     public List<AssetDTO> findAllByAdminLocation(String username) {
-        Location location = userRepo.findByUserName(username)
+        LocationEntity location = userRepo.findByUserName(username)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_ERROR)).getLocation();
         List<AssetDTO> AssetDTOs = assetRepo.findAll().stream().filter(p -> p.getLocation().equals(location))
             .map(AssetDTO::toDTO).collect(Collectors.toList());
-        AssetDTOs.sort(Comparator.comparing(AssetDTO::getAssetCode));
+        AssetDTOs.sort(Comparator.comparing(AssetDTO::getId));
 
         return AssetDTOs;
     }
@@ -68,31 +65,31 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public AssetDTO findbyId(String assetCode) throws ResourceNotFoundException {
-        AssetEntity assetEntity = assetRepo.findById(assetCode).orElseThrow(
-                () -> new ResourceNotFoundException("Asset is not found for this asset code:" + assetCode));
+    public AssetDTO findbyId(String id) throws ResourceNotFoundException {
+        AssetEntity assetEntity = assetRepo.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Asset is not found for this asset code:" + id));
         return AssetDTO.toDTO(assetEntity);
     }
 
     @Override
-    public Boolean canDelete(String assetCode) {
-        return !(assetRepo.findById(assetCode).orElseThrow(() -> new ResourceNotFoundException(ASSET_NOT_FOUND_ERROR))
+    public Boolean canDelete(String id) {
+        return !(assetRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException(ASSET_NOT_FOUND_ERROR))
                 .getAssignmentEntities().size() > 0);
     }
 
     @Override
-    public Boolean delete(String assetCode) {
-        AssetEntity asset = assetRepo.findById(assetCode)
+    public Boolean delete(String id) {
+        AssetEntity asset = assetRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(ASSET_NOT_FOUND_ERROR));
         if (asset.getAssignmentEntities().size() > 0)
             throw new ConflictException(ASSET_CONFLICT_ERROR);
-        assetRepo.deleteById(assetCode);
+        assetRepo.deleteById(id);
         return true;
     }
 
     @Override
     public AssetDTO update(AssetDTO dto) {
-        AssetEntity asset = assetRepo.findById(dto.getAssetCode())
+        AssetEntity asset = assetRepo.findById(dto.getId())
                 .orElseThrow(() -> new ResourceNotFoundException(ASSET_NOT_FOUND_ERROR));
         if (asset.getState() == AssetState.ASSIGNED) {
             throw new ConflictException("Asset has been assigned");
@@ -107,7 +104,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public int countByCategory(Long categoryId, String username) {
-        Location location = userRepo.findByUserName(username).get().getLocation();
+        LocationEntity location = userRepo.findByUserName(username).get().getLocation();
         CategoryEntity category = categoryRepo.findById(categoryId).get();
         return assetRepo.countByCategoryEntityAndLocation(category, location);
     }

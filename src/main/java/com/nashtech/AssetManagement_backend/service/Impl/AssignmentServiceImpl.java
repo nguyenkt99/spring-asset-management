@@ -39,7 +39,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     JavaMailSender javaMailSender;
     @Override
     public List<AssignmentDTO> getAllByAdmimLocation(String username) {
-        Location location = userService.findByUserName(username).getLocation();
+        LocationEntity location = userService.findByUserName(username).getLocation();
         List<AssignmentDTO> assignmentDTOs = assignmentRepository.findAllByAdmimLocation(location)
                 .stream().map(AssignmentDTO::toDTO).collect(Collectors.toList());
         return assignmentDTOs;
@@ -60,7 +60,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         states.add(AssignmentState.WAITING_FOR_ACCEPTANCE);
         states.add(AssignmentState.ACCEPTED);
 //        states.add(AssignmentState.CANCELED_ASSIGN);
-        List<AssignmentDTO> assignmentDTOs = assignmentRepository.findByAssignTo_StaffCodeAndAssignedDateIsLessThanEqualAndStateIn(user.getStaffCode(), new Date(), states)
+        List<AssignmentDTO> assignmentDTOs = assignmentRepository.findByAssignTo_IdAndAssignedDateIsLessThanEqualAndStateIn(user.getId(), new Date(), states)
                 .stream().map(AssignmentDTO::toDTO).collect(Collectors.toList());
         assignmentDTOs.sort(Comparator.comparing(AssignmentDTO::getId));
         return assignmentDTOs;
@@ -116,7 +116,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         msg.setTo(assignTo.getEmail());
         msg.setSubject("New assignment assigned to you");
         msg.setText("Your administrator has assigned you a new assignment: \nAsset " +
-                "code: "+assignment.getAssetEntity().getAssetCode()+
+                "code: "+assignment.getAssetEntity().getId()+
                 "\nAsset name: "+ assignment.getAssetEntity().getAssetName()+
                 "\nDate: "+dateFormatter.format(assignment.getAssignedDate())+
                 "\nPlease check your assignment by your account\nKind Regards,\nAdministrator");
@@ -150,7 +150,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         UsersEntity assignBy;
 
         // case: new asset
-        if (!assignmentDTO.getAssetCode().equalsIgnoreCase(assignment.getAssetEntity().getAssetCode())) {
+        if (!assignmentDTO.getAssetCode().equalsIgnoreCase(assignment.getAssetEntity().getId())) {
             AssetEntity asset = assetRepository.findById(assignmentDTO.getAssetCode())
                     .orElseThrow(() -> new ResourceNotFoundException("Asset not found!"));
             if (asset.getState() != AssetState.AVAILABLE) {
@@ -188,7 +188,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         msg.setSubject("Your assignment has been update by Administrator");
         msg.setText("Your administrator has been update your assignment: "+
                 "\nAssignment code: "+assignment.getId()+
-                "\nAsset code: "+assignment.getAssetEntity().getAssetCode()+
+                "\nAsset code: "+assignment.getAssetEntity().getId()+
                 "\nAsset name: "+ assignment.getAssetEntity().getAssetName()+
                 "\nDate: "+dateFormatter.format(assignment.getAssignedDate())+
                 "\nPlease check your assignment by your account\nKind Regards,\nAdministrator");
@@ -197,11 +197,11 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
-    public boolean deleteAssignment(Long assignmentId, Location location) {
+    public boolean deleteAssignment(Long assignmentId, LocationEntity location) {
         AssignmentEntity assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Assignment not found!"));
 
-        if (assignment.getAssignBy().getLocation() != location) {
+        if (assignment.getAssignBy().getLocation().equals(location)) { // compare object !!!!
             throw new BadRequestException("Invalid access!");
         }
 
@@ -209,7 +209,7 @@ public class AssignmentServiceImpl implements AssignmentService {
             throw new BadRequestException("Assignment delete when state is Waiting for acceptance or Declined!");
         }
 
-        AssetEntity assetEntity = assetRepository.getById(assignment.getAssetEntity().getAssetCode());
+        AssetEntity assetEntity = assetRepository.getById(assignment.getAssetEntity().getId());
         assetEntity.setState(AssetState.AVAILABLE);
         assetRepository.save(assetEntity);
 

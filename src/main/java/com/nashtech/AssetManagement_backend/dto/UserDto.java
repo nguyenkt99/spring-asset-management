@@ -24,8 +24,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDto {
-
-    private String staffCode;
+    private String id;
 
     @Size(max = 50)
     @NotBlank(message = "firstname can't not be blank")
@@ -67,11 +66,11 @@ public class UserDto {
         dto.setFirstName(entity.getFirstName());
         dto.setDateOfBirth(entity.getDateOfBirth());
         dto.setJoinedDate(entity.getJoinedDate());
-        dto.setLocation(entity.getLocation());
+        dto.setLocation(entity.getLocation().getName());
         dto.setType(entity.getRole().getName());
         dto.setState(entity.getState());
         dto.setGender(entity.getGender());
-        dto.setStaffCode(entity.getStaffCode());
+        dto.setId(entity.getId());
         dto.setUsername(entity.getUserName());
         dto.setFirstLogin(entity.isFirstLogin());
         dto.setEmail(entity.getEmail());
@@ -86,7 +85,7 @@ public class UserDto {
         entity.setDateOfBirth(dto.getDateOfBirth());
         entity.setJoinedDate(dto.getJoinedDate());
         entity.setGender(dto.getGender());
-        entity.setLocation(dto.getLocation());
+//        entity.setLocation(dto.getLocation());
         entity.setFirstLogin(dto.isFirstLogin);
         entity.setState(dto.getState());
         entity.setEmail(dto.getEmail());

@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "assignment")
+@Table(name = "assignments")
 public class AssignmentEntity {
 
     @Id

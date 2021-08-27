@@ -40,7 +40,7 @@ public class RequestDTO {
         if(entity.getAcceptBy() != null)
             this.acceptBy = entity.getAcceptBy().getUserName();
         this.assignmentId = entity.getAssignmentEntity().getId();
-        this.assetCode = entity.getAssignmentEntity().getAssetEntity().getAssetCode();
+        this.assetCode = entity.getAssignmentEntity().getAssetEntity().getId();
         this.assetName = entity.getAssignmentEntity().getAssetEntity().getAssetName();
         this.assignedDate = entity.getAssignmentEntity().getAssignedDate();
     }

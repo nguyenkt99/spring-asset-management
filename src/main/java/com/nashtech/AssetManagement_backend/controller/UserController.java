@@ -1,8 +1,7 @@
 package com.nashtech.AssetManagement_backend.controller;
 
 import com.nashtech.AssetManagement_backend.dto.UserDto;
-import com.nashtech.AssetManagement_backend.entity.Location;
-import com.nashtech.AssetManagement_backend.repository.UserRepository;
+import com.nashtech.AssetManagement_backend.entity.LocationEntity;
 import com.nashtech.AssetManagement_backend.security.services.UserDetailsImpl;
 import com.nashtech.AssetManagement_backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.text.ParseException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -24,23 +21,19 @@ import java.util.Map;
 public class UserController {
     @Autowired
     private UserService userService;
-    @Autowired
-    private UserRepository userRepository;
 
     @GetMapping("")
-    public ResponseEntity<List<UserDto>> getAll (HttpServletRequest request) {
-        String userName = (String) request.getAttribute("userName");
-        Location location = userService.getLocationByUserName(userName);
+    public ResponseEntity<List<UserDto>> getAll (Authentication authentication) {
+        LocationEntity location = userService.getLocationByUserName(authentication.getName());
         List<UserDto> userDtos = userService.retrieveUsers(location);
 
         return new ResponseEntity<>(userDtos, HttpStatus.OK);
     }
 
-    @GetMapping("/{staffCode}")
-    public ResponseEntity<UserDto> getUserById(HttpServletRequest request, @PathVariable("staffCode") String staffCode) {
-        String userName = (String) request.getAttribute("userName");
-        Location location = userService.getLocationByUserName(userName);
-        UserDto userDto = userService.getUserByStaffCode(staffCode, location);
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDto> getUserById(Authentication authentication, @PathVariable("id") String id) {
+        LocationEntity location = userService.getLocationByUserName(authentication.getName());
+        UserDto userDto = userService.getUserById(id, location);
 
         return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
@@ -53,36 +46,26 @@ public class UserController {
     }
 
     @PostMapping("")
-    public ResponseEntity<UserDto> addUser( HttpServletRequest request, @Valid @RequestBody UserDto userDto) throws ParseException {
-        String userName = (String) request.getAttribute("userName");
-        //set location staff = location admin create;
-        userDto.setLocation(userRepository.findByUserName(userName).get().getLocation());
-        return new ResponseEntity<>(userService.saveUser(userDto), HttpStatus.CREATED);
+    public ResponseEntity<UserDto> addUser(Authentication authentication, @Valid @RequestBody UserDto userDto) throws ParseException {
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        return new ResponseEntity<>(userService.saveUser(userDto, userDetails.getUsername()), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{staffCode}")
-    public ResponseEntity<UserDto> editUser(@PathVariable("staffCode") String staffCode, @RequestBody UserDto userDto) {
-        userDto.setStaffCode(staffCode);
+    @PutMapping("/{id}")
+    public ResponseEntity<UserDto> editUser(@PathVariable("id") String id, @RequestBody UserDto userDto) {
+        userDto.setId(id);
         UserDto updateUser = userService.updateUser(userDto);
         return new ResponseEntity<>(updateUser, HttpStatus.OK);
     }
 
-//    @DeleteMapping("/{staffCode}")
-//    public ResponseEntity<Map<String, Boolean>> deleteCategory(HttpServletRequest request, @PathVariable("staffCode") String staffCode)  {
-//        userService.deleteUser(staffCode);
-//        Map<String, Boolean> map = new HashMap<>();
-//        map.put("success", true);
-//        return new ResponseEntity<>(map, HttpStatus.OK);
-//    }
-
-    @GetMapping("/disable/{staffCode}")
-    public ResponseEntity<Boolean> canDisableUser(@PathVariable("staffCode") String staffCode){
-        return ResponseEntity.ok().body(userService.canDisableUser(staffCode));
+    @GetMapping("/disable/{id}")
+    public ResponseEntity<Boolean> canDisableUser(@PathVariable("id") String id){
+        return ResponseEntity.ok().body(userService.canDisableUser(id));
     }
 
-    @PutMapping("/disable/{staffCode}")
-    public ResponseEntity<Boolean> disableUser(@PathVariable("staffCode") String staffCode){
-        return ResponseEntity.ok().body(userService.disableUser(staffCode));
+    @PutMapping("/disable/{id}")
+    public ResponseEntity<Boolean> disableUser(@PathVariable("id") String id){
+        return ResponseEntity.ok().body(userService.disableUser(id));
     }
 
 }

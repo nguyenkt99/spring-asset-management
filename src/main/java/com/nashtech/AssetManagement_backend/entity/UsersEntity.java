@@ -26,17 +26,15 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 public class UsersEntity {
-
     @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     @GenericGenerator(
             name = "user_seq",
             strategy = "com.nashtech.AssetManagement_backend.generators.StaffCodeGenerator",
             parameters = {
-                    @Parameter(name = StaffCodeGenerator.INCREMENT_PARAM, value = "50"),
-                    @Parameter(name = StaffCodeGenerator.VALUE_PREFIX_PARAMETER, value = "SD"),
                     @Parameter(name = StaffCodeGenerator.NUMBER_FORMAT_PARAMETER, value = "%04d") })
-    private String staffCode;
+    private String id;
 
     @Column(name = "first_name")
     private String firstName;
@@ -52,30 +50,18 @@ public class UsersEntity {
     @Column(name = "user_name")
     private String userName;
 
-
-    //    @NotBlank
     @Size(min=6, max = 100)
     @GeneratorType(type = PasswordGenerator.class, when = GenerationTime.INSERT)
     private String password;
 
     @Column(name = "date_of_birth")
-//    @CreationTimestamp
     private Date dateOfBirth;
 
     @Column(name = "joined_date")
-//    @CreationTimestamp
     private Date joinedDate;
+
     @Column(name = "email")
-//    @CreationTimestamp
     private String email;
-    @Column(name = "created_date")
-    @CreationTimestamp
-    private Date createdDate;
-
-    @Enumerated(EnumType.STRING)
-    @Column(length = 60,name = "location")
-    private Location location;
-
 
     @Column(name = "is_first_login")
     private boolean isFirstLogin;
@@ -95,6 +81,10 @@ public class UsersEntity {
 
     @OneToMany(mappedBy = "acceptBy")
     private List<RequestEntity> acceptBys = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name="location_id")
+    private LocationEntity location;
 
     @NotNull
     @Enumerated(EnumType.STRING)

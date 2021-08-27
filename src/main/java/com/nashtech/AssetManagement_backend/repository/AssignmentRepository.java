@@ -9,6 +9,7 @@ import com.nashtech.AssetManagement_backend.entity.AssignmentEntity;
 import com.nashtech.AssetManagement_backend.entity.AssignmentState;
 import com.nashtech.AssetManagement_backend.entity.Location;
 
+import com.nashtech.AssetManagement_backend.entity.LocationEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,10 +21,9 @@ public interface AssignmentRepository extends JpaRepository<AssignmentEntity, Lo
             + "join UsersEntity u on u = a.assignBy "
             + "where u.location like :location "
             + "and (a.state like 'ACCEPTED' "
-            + "or a.state like 'WAITING_FOR_ACCEPTANCE' "
-            + "or a.state like 'CANCELED_ASSIGN') "
+            + "or a.state like 'WAITING_FOR_ACCEPTANCE' )"
             + "order by a.id asc")
-    List<AssignmentEntity> findAllByAdmimLocation(@Param("location") Location location);
+    List<AssignmentEntity> findAllByAdmimLocation(@Param("location") LocationEntity location);
 
 //    @Transactional
 //    @Query("select a from AssignmentEntity a "
@@ -36,5 +36,5 @@ public interface AssignmentRepository extends JpaRepository<AssignmentEntity, Lo
 //            + "order by a.id asc")
 //    List<AssignmentEntity> findAssignmentsByUser(@Param("username") String username);
 
-    List<AssignmentEntity> findByAssignTo_StaffCodeAndAssignedDateIsLessThanEqualAndStateIn(String staffCode, Date currentDate, List<AssignmentState> states);
+    List<AssignmentEntity> findByAssignTo_IdAndAssignedDateIsLessThanEqualAndStateIn(String staffCode, Date currentDate, List<AssignmentState> states);
 }

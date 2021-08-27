@@ -6,29 +6,26 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
-
-
+@Entity
+@Table(name = "locations")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "categories")
-public class CategoryEntity {
+public class LocationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name ="name", unique = true)
-    private String name;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "location")
+    private Location name;
 
-    @Column(name = "prefix", unique = true)
-    private String prefix;
+    @OneToMany(mappedBy = "location")
+    List<UsersEntity> users;
 
-    @OneToMany(mappedBy = "categoryEntity")
-    private List<AssetEntity> assetEntities = new ArrayList<>();
-
+    @OneToMany(mappedBy = "location")
+    List<AssetEntity> assets;
 }

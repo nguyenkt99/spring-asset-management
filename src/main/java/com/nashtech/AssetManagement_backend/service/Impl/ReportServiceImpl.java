@@ -4,6 +4,7 @@ import com.nashtech.AssetManagement_backend.dto.ReportDTO;
 import com.nashtech.AssetManagement_backend.dto.StateQuantity;
 import com.nashtech.AssetManagement_backend.entity.CategoryEntity;
 import com.nashtech.AssetManagement_backend.entity.Location;
+import com.nashtech.AssetManagement_backend.entity.LocationEntity;
 import com.nashtech.AssetManagement_backend.repository.AssetRepository;
 import com.nashtech.AssetManagement_backend.repository.CategoryRepository;
 import com.nashtech.AssetManagement_backend.repository.UserRepository;
@@ -27,7 +28,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<ReportDTO> getReport(String username) {
-        Location location = userRepository.findByUserName(username).get().getLocation();
+        LocationEntity location = userRepository.findByUserName(username).get().getLocation();
         List<CategoryEntity> categories = categoryRepository.findAll();
         List<ReportDTO> reportList = new ArrayList<>();
         for(CategoryEntity category : categories) {
@@ -36,7 +37,7 @@ public class ReportServiceImpl implements ReportService {
         return reportList;
     }
 
-    private ReportDTO getReportByCategory(CategoryEntity category, Location location) {
+    private ReportDTO getReportByCategory(CategoryEntity category, LocationEntity location) {
         ReportDTO report = new ReportDTO(category.getName(), 0, 0, 0, 0, 0, 0);
         List<StateQuantity> stateQuantityList = assetRepository.countState(category.getId(), location.toString());
 

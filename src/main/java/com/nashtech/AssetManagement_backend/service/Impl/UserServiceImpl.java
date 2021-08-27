@@ -7,6 +7,7 @@ import com.nashtech.AssetManagement_backend.exception.ConflictException;
 import com.nashtech.AssetManagement_backend.exception.InvalidInputException;
 import com.nashtech.AssetManagement_backend.exception.ResourceNotFoundException;
 import com.nashtech.AssetManagement_backend.handleException.NotFoundExecptionHandle;
+import com.nashtech.AssetManagement_backend.repository.LocationRepository;
 import com.nashtech.AssetManagement_backend.repository.RoleRepository;
 import com.nashtech.AssetManagement_backend.repository.UserRepository;
 import com.nashtech.AssetManagement_backend.service.OTPService;
@@ -31,6 +32,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     RoleRepository roleRepository;
+
+    @Autowired
+    LocationRepository locationRepository;
 
     @Override
     public UsersEntity findByUserName(String username) {
@@ -71,8 +75,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto saveUser(UserDto userDto) throws BadRequestException {
+    public UserDto saveUser(UserDto userDto, String username) {
+        LocationEntity location = userRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found!")).getLocation();
         UsersEntity usersEntity = userDto.toEntity(userDto);
+        usersEntity.setLocation(location);
         // validate
         if (usersEntity.getJoinedDate().before(usersEntity.getDateOfBirth()))
             throw new InvalidInputException(
@@ -88,11 +95,11 @@ public class UserServiceImpl implements UserService {
         RolesEntity rolesEntity = roleRepository.getByName(userDto.getType());
         usersEntity.setRole(rolesEntity);
         usersEntity = userRepository.save(usersEntity);
-        return new UserDto().toDto(userRepository.getByStaffCode(usersEntity.getStaffCode()));
+        return new UserDto().toDto(userRepository.getById(usersEntity.getId()));
     }
 
     @Override
-    public List<UserDto> retrieveUsers(Location location) {
+    public List<UserDto> retrieveUsers(LocationEntity location) {
         List<UsersEntity> usersEntities = userRepository.findAllByLocationAndState(location, UserState.Enable);
         usersEntities = usersEntities.stream()
                 .sorted(Comparator.comparing(o -> (o.getFirstName() + ' ' + o.getLastName())))
@@ -111,16 +118,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto getUserByStaffCode(String staffCode, Location location) throws ResourceNotFoundException {
-        UsersEntity user = userRepository.findByStaffCodeAndLocation(staffCode, location)
-                .orElseThrow(() -> new ResourceNotFoundException("user not found for this staff code: " + staffCode));
+    public UserDto getUserById(String id, LocationEntity location) throws ResourceNotFoundException {
+        UsersEntity user = userRepository.findByIdAndLocation(id, location)
+                .orElseThrow(() -> new ResourceNotFoundException("user not found for this staff code: " + id));
         return new UserDto().toDto(user);
     }
 
     @Override
     public UserDto updateUser(UserDto userDto) {
-        UsersEntity existUser = userRepository.findByStaffCode(userDto.getStaffCode()).orElseThrow(
-                () -> new ResourceNotFoundException("User not found for this staff code: " + userDto.getStaffCode()));
+        UsersEntity existUser = userRepository.findById(userDto.getId()).orElseThrow(
+                () -> new ResourceNotFoundException("User not found for this staff code: " + userDto.getId()));
 
         if (userDto.getJoinedDate().before(userDto.getDateOfBirth()))
             throw new InvalidInputException(
@@ -152,15 +159,7 @@ public class UserServiceImpl implements UserService {
         return new UserDto().toDto(user);
     }
 
-//    @Override
-//    public String deleteUser(String staffCode) throws ResourceNotFoundException {
-//        userRepository.findByStaffCode(staffCode)
-//                .orElseThrow(() -> new ResourceNotFoundException("user not found for this staff code: " + staffCode));
-//        userRepository.deleteByStaffCode(staffCode);
-//        return "deleted";
-//    }
-
-    public Location getLocationByUserName(String userName) {
+    public LocationEntity getLocationByUserName(String userName) {
         return userRepository.getByUserName(userName).getLocation();
     }
 
@@ -168,11 +167,11 @@ public class UserServiceImpl implements UserService {
     private final String DISABLE_CONFLICT = "There are valid assignments belonging to this user. Please close all assignments before disabling user.";
 
     @Override
-    public Boolean canDisableUser(String staffCode) {
-//        return !(userRepository.findByStaffCode(staffCode)
+    public Boolean canDisableUser(String id) {
+//        return !(userRepository.findByStaffCode(id)
 //                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND)).getAssignmentsBys().size() > 0);
 
-        UsersEntity usersEntity = userRepository.findByStaffCode(staffCode)
+        UsersEntity usersEntity = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
         for(AssignmentEntity assignment : usersEntity.getAssignmentTos()) {
             if(assignment.getState().equals(AssignmentState.WAITING_FOR_ACCEPTANCE) ||
@@ -184,12 +183,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean disableUser(String staffCode) {
-        UsersEntity usersEntity = userRepository.findByStaffCode(staffCode)
+    public Boolean disableUser(String id) {
+        UsersEntity usersEntity = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
-//        if (usersEntity.getAssignmentTos().size() > 0) {
-//            throw new ConflictException(DISABLE_CONFLICT);
-//        }
 
         // admin cannot disable user when user has assignment in WAITING_FOR_ACCEPTANCE or ACCEPTED state
         for(AssignmentEntity assignment : usersEntity.getAssignmentTos()) {

@@ -23,7 +23,7 @@ public class UsernameGenerator implements ValueGenerator<String> {
         String username = ((UsersEntity) o).getFirstName().toLowerCase() + initials.toString().toLowerCase();
 
 
-        Query query = session.createQuery("from UsersEntity where userName like: name order by createdDate DESC").setParameter("name", "%" + username + "%").setFlushMode(FlushModeType.COMMIT);
+        Query query = session.createQuery("from UsersEntity where userName like :name order by id DESC").setParameter("name", "%" + username + "%").setFlushMode(FlushModeType.COMMIT);
 
 
         int count = query.getResultList().size();

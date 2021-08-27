@@ -69,7 +69,7 @@ public class RequestServiceImpl implements RequestService {
                     "" +
                     "\nAsset" +
                     " " +
-                    "code: " + assignment.getAssetEntity().getAssetCode()+
+                    "code: " + assignment.getAssetEntity().getId()+
                     "\nAsset name: " + assignment.getAssetEntity().getAssetName()+
                     "\nRequested Date: " + format.format(request.getRequestedDate())+
                     "\nYou must return it within 3 days." +
@@ -82,7 +82,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<RequestDTO> getAllByAdminLocation(String adminUsername) {
-        Location location = userRepository.findByUserName(adminUsername).get().getLocation();
+        LocationEntity location = userRepository.findByUserName(adminUsername).get().getLocation();
         List<RequestDTO> requestDTOs = requestRepository.findAll().stream()
                 .filter(request -> (request.getRequestBy().getLocation().equals(location)))
                 .sorted((o1, o2) -> (int) (o1.getId() - o2.getId()))
@@ -118,7 +118,7 @@ public class RequestServiceImpl implements RequestService {
         if (!request.getState().equals(RequestState.WAITING_FOR_RETURNING))
             throw new BadRequestException(REQUEST_STATE_INVALID_ERROR);
         request.setState(RequestState.COMPLETED);
-        request.setAcceptBy(userRepository.getByStaffCode(staffCode));
+        request.setAcceptBy(userRepository.getById(staffCode));
         request.setReturnedDate(new Date());
         requestRepository.save(request);
         AssignmentEntity assignment = request.getAssignmentEntity();
@@ -133,7 +133,7 @@ public class RequestServiceImpl implements RequestService {
             msg.setSubject("Your request ");
             msg.setText("Administrator has been accepted your request: " +
                     "\nRequestID: "+request.getId()+
-                    "\nAsset code: "+assignment.getAssetEntity().getAssetCode()+
+                    "\nAsset code: "+assignment.getAssetEntity().getId()+
                     "\nAsset name: "+ assignment.getAssetEntity().getAssetName()+
                     "\nRequest state: "+request.getState()+
                     "\nPlease check your request by your account\nKind Regards," +

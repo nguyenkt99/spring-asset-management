@@ -30,7 +30,7 @@ public class AssetEntity {
             strategy = "com.nashtech.AssetManagement_backend.generators.AssetCodeGenerator",
             parameters = {
                     @Parameter(name = AssetCodeGenerator.NUMBER_FORMAT_PARAMETER, value = "%06d")})
-    private String assetCode;
+    private String id;
 
     @Column(name = "name")
     private String assetName;
@@ -45,11 +45,6 @@ public class AssetEntity {
     @Column(name = "installed_date")
     private Date installedDate;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 10,name = "location")
-    private Location location;
-
-
     @ManyToOne
     @JoinColumn(name="category_id")
     private CategoryEntity categoryEntity;
@@ -57,7 +52,8 @@ public class AssetEntity {
     @OneToMany(mappedBy = "assetEntity")
     private List<AssignmentEntity> assignmentEntities = new ArrayList<>();
 
-
-
+    @ManyToOne
+    @JoinColumn(name="location_id")
+    private LocationEntity location;
 }
 

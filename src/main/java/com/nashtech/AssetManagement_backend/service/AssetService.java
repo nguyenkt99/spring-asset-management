@@ -12,11 +12,11 @@ public interface AssetService {
 
     public AssetDTO findByAssetName(String assetName);
 
-    public AssetDTO findbyId(String assetCode);
+    public AssetDTO findbyId(String id);
 
-    Boolean canDelete(String assetCode);
+    Boolean canDelete(String id);
 
-    Boolean delete(String assetCode);
+    Boolean delete(String id);
 
     AssetDTO update(AssetDTO dto);
 
