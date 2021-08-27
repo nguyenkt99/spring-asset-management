@@ -3,7 +3,6 @@ package com.nashtech.AssetManagement_backend.service.Impl;
 import com.nashtech.AssetManagement_backend.dto.ReportDTO;
 import com.nashtech.AssetManagement_backend.dto.StateQuantity;
 import com.nashtech.AssetManagement_backend.entity.CategoryEntity;
-import com.nashtech.AssetManagement_backend.entity.Location;
 import com.nashtech.AssetManagement_backend.entity.LocationEntity;
 import com.nashtech.AssetManagement_backend.repository.AssetRepository;
 import com.nashtech.AssetManagement_backend.repository.CategoryRepository;

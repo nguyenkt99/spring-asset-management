@@ -52,7 +52,7 @@ public class AssetServiceImpl implements AssetService {
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_ERROR)).getLocation();
         List<AssetDTO> AssetDTOs = assetRepo.findAll().stream().filter(p -> p.getLocation().equals(location))
             .map(AssetDTO::toDTO).collect(Collectors.toList());
-        AssetDTOs.sort(Comparator.comparing(AssetDTO::getId));
+        AssetDTOs.sort(Comparator.comparing(AssetDTO::getAssetCode));
 
         return AssetDTOs;
     }
@@ -65,31 +65,31 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public AssetDTO findbyId(String id) throws ResourceNotFoundException {
-        AssetEntity assetEntity = assetRepo.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Asset is not found for this asset code:" + id));
+    public AssetDTO findByAssetCode(String assetCode) throws ResourceNotFoundException {
+        AssetEntity assetEntity = assetRepo.findByAssetCode(assetCode).orElseThrow(
+                () -> new ResourceNotFoundException("Asset is not found for this asset code:" + assetCode));
         return AssetDTO.toDTO(assetEntity);
     }
 
     @Override
-    public Boolean canDelete(String id) {
-        return !(assetRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException(ASSET_NOT_FOUND_ERROR))
+    public Boolean canDelete(String assetCode) {
+        return !(assetRepo.findByAssetCode(assetCode).orElseThrow(() -> new ResourceNotFoundException(ASSET_NOT_FOUND_ERROR))
                 .getAssignmentEntities().size() > 0);
     }
 
     @Override
-    public Boolean delete(String id) {
-        AssetEntity asset = assetRepo.findById(id)
+    public Boolean delete(String assetCode) {
+        AssetEntity asset = assetRepo.findByAssetCode(assetCode)
                 .orElseThrow(() -> new ResourceNotFoundException(ASSET_NOT_FOUND_ERROR));
         if (asset.getAssignmentEntities().size() > 0)
             throw new ConflictException(ASSET_CONFLICT_ERROR);
-        assetRepo.deleteById(id);
+        assetRepo.deleteById(assetCode);
         return true;
     }
 
     @Override
     public AssetDTO update(AssetDTO dto) {
-        AssetEntity asset = assetRepo.findById(dto.getId())
+        AssetEntity asset = assetRepo.findByAssetCode(dto.getAssetCode())
                 .orElseThrow(() -> new ResourceNotFoundException(ASSET_NOT_FOUND_ERROR));
         if (asset.getState() == AssetState.ASSIGNED) {
             throw new ConflictException("Asset has been assigned");

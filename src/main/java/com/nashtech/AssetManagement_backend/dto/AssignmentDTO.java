@@ -50,7 +50,7 @@ public class AssignmentDTO {
             return null;
         AssignmentDTO dto = new AssignmentDTO();
         dto.setId(assign.getId());
-        dto.setAssetCode(assign.getAssetEntity().getId());
+        dto.setAssetCode(assign.getAssetEntity().getAssetCode());
         dto.setAssetName(assign.getAssetEntity().getAssetName());
         dto.setCategory(assign.getAssetEntity().getCategoryEntity().getName());
         dto.setSpecfication(assign.getAssetEntity().getSpecification());

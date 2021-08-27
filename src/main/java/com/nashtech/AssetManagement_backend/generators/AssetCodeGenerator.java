@@ -44,12 +44,12 @@ public class AssetCodeGenerator extends SequenceStyleGenerator {
         int id = 1;
         if (query.getResultList().size() > 0) {
 
-            System.out.println("__________________--"+((AssetEntity) query.getResultList().get(0)).getId());
+            System.out.println("__________________--"+((AssetEntity) query.getResultList().get(0)).getAssetCode());
 
-            if(isNumeric(((AssetEntity) query.getResultList().get(0)).getId()
+            if(isNumeric(((AssetEntity) query.getResultList().get(0)).getAssetCode()
                     .replace(prefix, ""))){
 
-                id = Integer.parseInt(((AssetEntity) query.getResultList().get(0)).getId()
+                id = Integer.parseInt(((AssetEntity) query.getResultList().get(0)).getAssetCode()
                         .replace(prefix, "")) + 1;
                 System.out.println("__________________--"+id);
             }

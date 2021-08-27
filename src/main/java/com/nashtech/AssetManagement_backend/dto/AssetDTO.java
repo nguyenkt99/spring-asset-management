@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AssetDTO {
-    private String id;
+    private String assetCode;
     @NotBlank(message = "asset name can not be empty")
     @Length(max = 255)
     private String assetName;
@@ -42,7 +42,7 @@ public class AssetDTO {
         if (asset == null)
             return null;
         AssetDTO dto = new AssetDTO();
-        dto.setId(asset.getId());
+        dto.setAssetCode(asset.getAssetCode());
         dto.setLocation(asset.getLocation().getName());
         dto.setAssetName(asset.getAssetName());
         dto.setSpecification(asset.getSpecification());

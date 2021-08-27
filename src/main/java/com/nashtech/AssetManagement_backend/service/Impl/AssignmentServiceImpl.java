@@ -60,7 +60,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         states.add(AssignmentState.WAITING_FOR_ACCEPTANCE);
         states.add(AssignmentState.ACCEPTED);
 //        states.add(AssignmentState.CANCELED_ASSIGN);
-        List<AssignmentDTO> assignmentDTOs = assignmentRepository.findByAssignTo_IdAndAssignedDateIsLessThanEqualAndStateIn(user.getId(), new Date(), states)
+        List<AssignmentDTO> assignmentDTOs = assignmentRepository.findByAssignTo_StaffCodeAndAssignedDateIsLessThanEqualAndStateIn(user.getStaffCode(), new Date(), states)
                 .stream().map(AssignmentDTO::toDTO).collect(Collectors.toList());
         assignmentDTOs.sort(Comparator.comparing(AssignmentDTO::getId));
         return assignmentDTOs;
@@ -116,7 +116,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         msg.setTo(assignTo.getEmail());
         msg.setSubject("New assignment assigned to you");
         msg.setText("Your administrator has assigned you a new assignment: \nAsset " +
-                "code: "+assignment.getAssetEntity().getId()+
+                "code: "+assignment.getAssetEntity().getAssetCode()+
                 "\nAsset name: "+ assignment.getAssetEntity().getAssetName()+
                 "\nDate: "+dateFormatter.format(assignment.getAssignedDate())+
                 "\nPlease check your assignment by your account\nKind Regards,\nAdministrator");
@@ -150,7 +150,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         UsersEntity assignBy;
 
         // case: new asset
-        if (!assignmentDTO.getAssetCode().equalsIgnoreCase(assignment.getAssetEntity().getId())) {
+        if (!assignmentDTO.getAssetCode().equalsIgnoreCase(assignment.getAssetEntity().getAssetCode())) {
             AssetEntity asset = assetRepository.findById(assignmentDTO.getAssetCode())
                     .orElseThrow(() -> new ResourceNotFoundException("Asset not found!"));
             if (asset.getState() != AssetState.AVAILABLE) {
@@ -188,7 +188,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         msg.setSubject("Your assignment has been update by Administrator");
         msg.setText("Your administrator has been update your assignment: "+
                 "\nAssignment code: "+assignment.getId()+
-                "\nAsset code: "+assignment.getAssetEntity().getId()+
+                "\nAsset code: "+assignment.getAssetEntity().getAssetCode()+
                 "\nAsset name: "+ assignment.getAssetEntity().getAssetName()+
                 "\nDate: "+dateFormatter.format(assignment.getAssignedDate())+
                 "\nPlease check your assignment by your account\nKind Regards,\nAdministrator");
@@ -209,7 +209,7 @@ public class AssignmentServiceImpl implements AssignmentService {
             throw new BadRequestException("Assignment delete when state is Waiting for acceptance or Declined!");
         }
 
-        AssetEntity assetEntity = assetRepository.getById(assignment.getAssetEntity().getId());
+        AssetEntity assetEntity = assetRepository.getById(assignment.getAssetEntity().getAssetCode());
         assetEntity.setState(AssetState.AVAILABLE);
         assetRepository.save(assetEntity);
 

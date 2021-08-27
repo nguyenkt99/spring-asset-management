@@ -2,11 +2,15 @@ package com.nashtech.AssetManagement_backend.generators;
 
 
 import com.nashtech.AssetManagement_backend.entity.UsersEntity;
+import org.checkerframework.checker.regex.qual.Regex;
 import org.hibernate.Session;
 import org.hibernate.tuple.ValueGenerator;
 
 import javax.persistence.FlushModeType;
 import javax.persistence.Query;
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 
 public class UsernameGenerator implements ValueGenerator<String> {
@@ -25,11 +29,16 @@ public class UsernameGenerator implements ValueGenerator<String> {
 
         Query query = session.createQuery("from UsersEntity where userName like :name order by id DESC").setParameter("name", "%" + username + "%").setFlushMode(FlushModeType.COMMIT);
 
-
-        int count = query.getResultList().size();
+        String us = username.toString();
+        List<?> resultList = query.getResultList();
+        resultList = resultList.stream().map(e -> (UsersEntity)e)
+                .filter(e -> Pattern.compile("^\\d*$").matcher(e.getUserName().replace(us, "")).matches())
+                .collect(Collectors.toList());
+        int count = resultList.size();
         if (count > 0) {
-            String abc = ((UsersEntity) query.getResultList().get(0)).getUserName()
+            String abc = ((UsersEntity) resultList.get(0)).getUserName()
                     .replace(username, "");
+
             if (abc.length() == 0)
                 username += 1;
             else {

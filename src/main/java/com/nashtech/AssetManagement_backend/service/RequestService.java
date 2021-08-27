@@ -1,7 +1,6 @@
 package com.nashtech.AssetManagement_backend.service;
 
 import com.nashtech.AssetManagement_backend.dto.RequestDTO;
-import com.nashtech.AssetManagement_backend.entity.UsersEntity;
 
 import java.util.List;
 

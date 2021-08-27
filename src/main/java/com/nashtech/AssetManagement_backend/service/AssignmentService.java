@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.nashtech.AssetManagement_backend.dto.AssignmentDTO;
 import com.nashtech.AssetManagement_backend.entity.AssignmentState;
-import com.nashtech.AssetManagement_backend.entity.Location;
 import com.nashtech.AssetManagement_backend.entity.LocationEntity;
 
 public interface AssignmentService {

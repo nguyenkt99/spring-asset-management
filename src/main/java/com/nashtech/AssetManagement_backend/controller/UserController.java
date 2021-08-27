@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.text.ParseException;
 import java.util.List;
@@ -30,10 +29,10 @@ public class UserController {
         return new ResponseEntity<>(userDtos, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserDto> getUserById(Authentication authentication, @PathVariable("id") String id) {
+    @GetMapping("/{staffCode}")
+    public ResponseEntity<UserDto> getUserByStaffCode(Authentication authentication, @PathVariable("staffCode") String staffCode) {
         LocationEntity location = userService.getLocationByUserName(authentication.getName());
-        UserDto userDto = userService.getUserById(id, location);
+        UserDto userDto = userService.getUserByStaffCode(staffCode, location);
 
         return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
@@ -51,21 +50,21 @@ public class UserController {
         return new ResponseEntity<>(userService.saveUser(userDto, userDetails.getUsername()), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UserDto> editUser(@PathVariable("id") String id, @RequestBody UserDto userDto) {
-        userDto.setId(id);
+    @PutMapping("/{staffCode}")
+    public ResponseEntity<UserDto> editUser(@PathVariable("staffCode") String staffCode, @RequestBody UserDto userDto) {
+        userDto.setStaffCode(staffCode);
         UserDto updateUser = userService.updateUser(userDto);
         return new ResponseEntity<>(updateUser, HttpStatus.OK);
     }
 
-    @GetMapping("/disable/{id}")
-    public ResponseEntity<Boolean> canDisableUser(@PathVariable("id") String id){
-        return ResponseEntity.ok().body(userService.canDisableUser(id));
+    @GetMapping("/disable/{staffCode}")
+    public ResponseEntity<Boolean> canDisableUser(@PathVariable("staffCode") String staffCode){
+        return ResponseEntity.ok().body(userService.canDisableUser(staffCode));
     }
 
-    @PutMapping("/disable/{id}")
-    public ResponseEntity<Boolean> disableUser(@PathVariable("id") String id){
-        return ResponseEntity.ok().body(userService.disableUser(id));
+    @PutMapping("/disable/{staffCode}")
+    public ResponseEntity<Boolean> disableUser(@PathVariable("staffCode") String staffCode){
+        return ResponseEntity.ok().body(userService.disableUser(staffCode));
     }
 
 }

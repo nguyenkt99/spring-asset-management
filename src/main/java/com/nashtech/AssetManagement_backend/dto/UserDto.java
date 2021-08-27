@@ -24,7 +24,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDto {
-    private String id;
+    private String staffCode;
 
     @Size(max = 50)
     @NotBlank(message = "firstname can't not be blank")
@@ -70,7 +70,7 @@ public class UserDto {
         dto.setType(entity.getRole().getName());
         dto.setState(entity.getState());
         dto.setGender(entity.getGender());
-        dto.setId(entity.getId());
+        dto.setStaffCode(entity.getStaffCode());
         dto.setUsername(entity.getUserName());
         dto.setFirstLogin(entity.isFirstLogin());
         dto.setEmail(entity.getEmail());

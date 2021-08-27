@@ -32,7 +32,7 @@ public class StaffCodeGenerator extends SequenceStyleGenerator {
 
         List<?> resultList = query.getResultList();
         if (resultList.size() > 0) {
-            id = Integer.parseInt(String.valueOf(((UsersEntity) resultList.get(0)).getId()).replace(prefix , "")) + 1;
+            id = Integer.parseInt(String.valueOf(((UsersEntity) resultList.get(0)).getStaffCode()).replace(prefix , "")) + 1;
         }
 
         return prefix + String.format(format, id);

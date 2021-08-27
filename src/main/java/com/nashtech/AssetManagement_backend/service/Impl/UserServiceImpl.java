@@ -10,7 +10,6 @@ import com.nashtech.AssetManagement_backend.handleException.NotFoundExecptionHan
 import com.nashtech.AssetManagement_backend.repository.LocationRepository;
 import com.nashtech.AssetManagement_backend.repository.RoleRepository;
 import com.nashtech.AssetManagement_backend.repository.UserRepository;
-import com.nashtech.AssetManagement_backend.service.OTPService;
 import com.nashtech.AssetManagement_backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -95,7 +94,7 @@ public class UserServiceImpl implements UserService {
         RolesEntity rolesEntity = roleRepository.getByName(userDto.getType());
         usersEntity.setRole(rolesEntity);
         usersEntity = userRepository.save(usersEntity);
-        return new UserDto().toDto(userRepository.getById(usersEntity.getId()));
+        return new UserDto().toDto(userRepository.getByStaffCode(usersEntity.getStaffCode()));
     }
 
     @Override
@@ -107,27 +106,27 @@ public class UserServiceImpl implements UserService {
         return new UserDto().toListDto(usersEntities);
     }
 
-    @Override
-    public List<UserDto> retrieveUsers(Pageable pageable) {
-        List<UsersEntity> usersEntities = new ArrayList<>();
-        Page<UsersEntity> page;
-        page = userRepository.findAll(pageable);
+//    @Override
+//    public List<UserDto> retrieveUsers(Pageable pageable) {
+//        List<UsersEntity> usersEntities = new ArrayList<>();
+//        Page<UsersEntity> page;
+//        page = userRepository.findAll(pageable);
+//
+//        usersEntities = page.getContent();
+//        return new UserDto().toListDto(usersEntities);
+//    }
 
-        usersEntities = page.getContent();
-        return new UserDto().toListDto(usersEntities);
-    }
-
     @Override
-    public UserDto getUserById(String id, LocationEntity location) throws ResourceNotFoundException {
-        UsersEntity user = userRepository.findByIdAndLocation(id, location)
-                .orElseThrow(() -> new ResourceNotFoundException("user not found for this staff code: " + id));
+    public UserDto getUserByStaffCode(String staffCode, LocationEntity location) throws ResourceNotFoundException {
+        UsersEntity user = userRepository.findByStaffCodeAndLocation(staffCode, location)
+                .orElseThrow(() -> new ResourceNotFoundException("user not found for this staff code: " + staffCode));
         return new UserDto().toDto(user);
     }
 
     @Override
     public UserDto updateUser(UserDto userDto) {
-        UsersEntity existUser = userRepository.findById(userDto.getId()).orElseThrow(
-                () -> new ResourceNotFoundException("User not found for this staff code: " + userDto.getId()));
+        UsersEntity existUser = userRepository.findByStaffCode(userDto.getStaffCode()).orElseThrow(
+                () -> new ResourceNotFoundException("User not found for this staff code: " + userDto.getStaffCode()));
 
         if (userDto.getJoinedDate().before(userDto.getDateOfBirth()))
             throw new InvalidInputException(
@@ -167,11 +166,11 @@ public class UserServiceImpl implements UserService {
     private final String DISABLE_CONFLICT = "There are valid assignments belonging to this user. Please close all assignments before disabling user.";
 
     @Override
-    public Boolean canDisableUser(String id) {
-//        return !(userRepository.findByStaffCode(id)
+    public Boolean canDisableUser(String staffCode) {
+//        return !(userRepository.findByStaffCode(staffCode)
 //                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND)).getAssignmentsBys().size() > 0);
 
-        UsersEntity usersEntity = userRepository.findById(id)
+        UsersEntity usersEntity = userRepository.findByStaffCode(staffCode)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
         for(AssignmentEntity assignment : usersEntity.getAssignmentTos()) {
             if(assignment.getState().equals(AssignmentState.WAITING_FOR_ACCEPTANCE) ||
@@ -183,8 +182,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean disableUser(String id) {
-        UsersEntity usersEntity = userRepository.findById(id)
+    public Boolean disableUser(String staffCode) {
+        UsersEntity usersEntity = userRepository.findByStaffCode(staffCode)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
 
         // admin cannot disable user when user has assignment in WAITING_FOR_ACCEPTANCE or ACCEPTED state

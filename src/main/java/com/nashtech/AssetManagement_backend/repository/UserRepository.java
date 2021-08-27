@@ -7,11 +7,11 @@ import java.util.Optional;
 
 
 public interface UserRepository extends JpaRepository<UsersEntity, Long> {
-    UsersEntity getById(String id);
+    UsersEntity getByStaffCode(String staffCode);
 
-    Optional<UsersEntity> findById(String id);
+    Optional<UsersEntity> findByStaffCode(String staffCode);
 
-    Optional<UsersEntity> findByIdAndLocation(String id, LocationEntity location);
+    Optional<UsersEntity> findByStaffCodeAndLocation(String staffCode, LocationEntity location);
 
     UsersEntity getByUserName(String username);
 

@@ -36,5 +36,5 @@ public interface AssignmentRepository extends JpaRepository<AssignmentEntity, Lo
 //            + "order by a.id asc")
 //    List<AssignmentEntity> findAssignmentsByUser(@Param("username") String username);
 
-    List<AssignmentEntity> findByAssignTo_IdAndAssignedDateIsLessThanEqualAndStateIn(String staffCode, Date currentDate, List<AssignmentState> states);
+    List<AssignmentEntity> findByAssignTo_StaffCodeAndAssignedDateIsLessThanEqualAndStateIn(String staffCode, Date currentDate, List<AssignmentState> states);
 }

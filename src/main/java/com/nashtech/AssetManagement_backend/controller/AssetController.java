@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -25,14 +24,14 @@ public class AssetController {
     public ResponseEntity<AssetDTO> create(@Valid @RequestBody AssetDTO dto, Authentication authentication) {
         return ResponseEntity.ok().body(assetService.create(dto, authentication.getName()));
     }
-    @GetMapping("/{id}/delete")
-    public ResponseEntity<Boolean> canDelete(@PathVariable("id") String id) {
-        return ResponseEntity.ok().body(assetService.canDelete(id));
+    @GetMapping("/{assetCode}/delete")
+    public ResponseEntity<Boolean> canDelete(@PathVariable("assetCode") String assetCode) {
+        return ResponseEntity.ok().body(assetService.canDelete(assetCode));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Boolean> delete(@PathVariable("id") String id) {
-        return ResponseEntity.ok().body(assetService.delete(id));
+    @DeleteMapping("/{assetCode}")
+    public ResponseEntity<Boolean> delete(@PathVariable("assetCode") String assetCode) {
+        return ResponseEntity.ok().body(assetService.delete(assetCode));
     }
 
     @GetMapping("")
@@ -45,15 +44,15 @@ public class AssetController {
         return new ResponseEntity<>(assetDTOs, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<AssetDTO> getAssetByAssetCode(@PathVariable("id") String id){
-        AssetDTO assetDTOs = assetService.findbyId(id);
+    @GetMapping("/{assetCode}")
+    public ResponseEntity<AssetDTO> getAssetByAssetCode(@PathVariable("assetCode") String assetCode){
+        AssetDTO assetDTOs = assetService.findByAssetCode(assetCode);
         return new ResponseEntity<>(assetDTOs, HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<AssetDTO> update(@Valid @RequestBody AssetDTO dto, @PathVariable("id") String id) {
-        dto.setId(id);
+    @PutMapping("/{assetCode}")
+    public ResponseEntity<AssetDTO> update(@Valid @RequestBody AssetDTO dto, @PathVariable("assetCode") String assetCode) {
+        dto.setAssetCode(assetCode);
         return ResponseEntity.ok().body(assetService.update(dto));
     }
 

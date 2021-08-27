@@ -3,7 +3,6 @@ package com.nashtech.AssetManagement_backend.repository;
 import com.nashtech.AssetManagement_backend.dto.StateQuantity;
 import com.nashtech.AssetManagement_backend.entity.AssetEntity;
 import com.nashtech.AssetManagement_backend.entity.CategoryEntity;
-import com.nashtech.AssetManagement_backend.entity.Location;
 import com.nashtech.AssetManagement_backend.entity.LocationEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,8 +11,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AssetRepository extends JpaRepository<AssetEntity, String> {
-    AssetEntity getByAssetName(String assetName);
+//    AssetEntity getByAssetName(String assetName);
     Optional<AssetEntity> findByAssetName(String assetName);
+    Optional<AssetEntity> findByAssetCode(String assetCode);
+
 
     int countByCategoryEntityAndLocation(CategoryEntity category, LocationEntity location);
 

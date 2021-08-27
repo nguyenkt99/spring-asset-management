@@ -1,7 +1,6 @@
 package com.nashtech.AssetManagement_backend.service;
 
 import com.nashtech.AssetManagement_backend.dto.AssetDTO;
-import com.nashtech.AssetManagement_backend.entity.CategoryEntity;
 
 import java.util.List;
 
@@ -12,11 +11,11 @@ public interface AssetService {
 
     public AssetDTO findByAssetName(String assetName);
 
-    public AssetDTO findbyId(String id);
+    public AssetDTO findByAssetCode(String assetCode);
 
-    Boolean canDelete(String id);
+    Boolean canDelete(String assetCode);
 
-    Boolean delete(String id);
+    Boolean delete(String assetCode);
 
     AssetDTO update(AssetDTO dto);
 

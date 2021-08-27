@@ -30,7 +30,8 @@ public class AssetEntity {
             strategy = "com.nashtech.AssetManagement_backend.generators.AssetCodeGenerator",
             parameters = {
                     @Parameter(name = AssetCodeGenerator.NUMBER_FORMAT_PARAMETER, value = "%06d")})
-    private String id;
+    @Column(name = "asset_code")
+    private String assetCode;
 
     @Column(name = "name")
     private String assetName;

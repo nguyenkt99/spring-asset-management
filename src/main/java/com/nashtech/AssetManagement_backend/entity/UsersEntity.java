@@ -27,14 +27,14 @@ import java.util.List;
 @Table(name = "users")
 public class UsersEntity {
     @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     @GenericGenerator(
             name = "user_seq",
             strategy = "com.nashtech.AssetManagement_backend.generators.StaffCodeGenerator",
             parameters = {
                     @Parameter(name = StaffCodeGenerator.NUMBER_FORMAT_PARAMETER, value = "%04d") })
-    private String id;
+    @Column(name = "staff_code")
+    private String staffCode;
 
     @Column(name = "first_name")
     private String firstName;
