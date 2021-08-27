@@ -19,11 +19,11 @@ public interface AssignmentRepository extends JpaRepository<AssignmentEntity, Lo
     @Transactional
     @Query("select a from AssignmentEntity a "
             + "join UsersEntity u on u = a.assignBy "
-            + "where u.location like :location "
+            + "where u.location.id = ?1 "
             + "and (a.state like 'ACCEPTED' "
             + "or a.state like 'WAITING_FOR_ACCEPTANCE' )"
             + "order by a.id asc")
-    List<AssignmentEntity> findAllByAdmimLocation(@Param("location") LocationEntity location);
+    List<AssignmentEntity> findAllByAdmimLocation(@Param("location") long location);
 
 //    @Transactional
 //    @Query("select a from AssignmentEntity a "

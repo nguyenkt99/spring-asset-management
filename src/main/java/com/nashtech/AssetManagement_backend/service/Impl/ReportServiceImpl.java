@@ -39,7 +39,7 @@ public class ReportServiceImpl implements ReportService {
 
     private ReportDTO getReportByCategory(CategoryEntity category, LocationEntity location) {
         ReportDTO report = new ReportDTO(category.getName(), 0, 0, 0, 0, 0, 0);
-        List<StateQuantity> stateQuantityList = assetRepository.countState(category.getId(), location.toString());
+        List<StateQuantity> stateQuantityList = assetRepository.countState(category.getId(), location.getId());
 
         report.setTotal(assetRepository.countByCategoryEntityAndLocation(category, location));
         for(StateQuantity stateQuantity : stateQuantityList) {

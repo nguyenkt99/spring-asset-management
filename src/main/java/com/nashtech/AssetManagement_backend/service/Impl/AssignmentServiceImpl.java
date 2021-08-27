@@ -40,7 +40,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Override
     public List<AssignmentDTO> getAllByAdmimLocation(String username) {
         LocationEntity location = userService.findByUserName(username).getLocation();
-        List<AssignmentDTO> assignmentDTOs = assignmentRepository.findAllByAdmimLocation(location)
+        List<AssignmentDTO> assignmentDTOs = assignmentRepository.findAllByAdmimLocation(location.getId())
                 .stream().map(AssignmentDTO::toDTO).collect(Collectors.toList());
         return assignmentDTOs;
     }
