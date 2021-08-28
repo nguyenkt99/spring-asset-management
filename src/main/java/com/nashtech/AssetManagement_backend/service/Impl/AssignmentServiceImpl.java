@@ -210,7 +210,8 @@ public class AssignmentServiceImpl implements AssignmentService {
         }
 
         AssetEntity assetEntity = assetRepository.getById(assignment.getAssetEntity().getAssetCode());
-        assetEntity.setState(AssetState.AVAILABLE);
+        if(assignment.getState() == AssignmentState.WAITING_FOR_ACCEPTANCE) // if assignment is waiting for acceptance then set asset state is available
+            assetEntity.setState(AssetState.AVAILABLE);
         assetRepository.save(assetEntity);
 
         assignmentRepository.deleteById(assignmentId);

@@ -110,7 +110,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public void accept(Long id, String staffCode) {
+    public RequestDTO accept(Long id, String staffCode) {
         RequestEntity request = requestRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(REQUEST_NOT_FOUND_ERROR));
         if (!request.getState().equals(RequestState.WAITING_FOR_RETURNING))
@@ -139,6 +139,7 @@ public class RequestServiceImpl implements RequestService {
             javaMailSender.send(msg);
         }
         assignmentRepository.save(assignment);
+        return new RequestDTO(request);
     }
 
     private final String REQUEST_NOT_FOUND_ERROR = "Request not found.";

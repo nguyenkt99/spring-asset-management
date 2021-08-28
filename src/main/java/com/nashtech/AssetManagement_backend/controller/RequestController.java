@@ -31,11 +31,10 @@ public class RequestController {
     }
 
     @PutMapping("/{requestId}")
-    public ResponseEntity<Void> acceptRequest(@PathVariable("requestId") Long requestId) {
+    public ResponseEntity<RequestDTO> acceptRequest(@PathVariable("requestId") Long requestId) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-        requestService.accept(requestId, userDetails.getStaffCode());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body(requestService.accept(requestId, userDetails.getStaffCode()));
     }
 
     @DeleteMapping("/{requestId}")

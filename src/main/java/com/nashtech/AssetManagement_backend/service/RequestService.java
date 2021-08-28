@@ -11,6 +11,6 @@ public interface RequestService {
 
     void delete(Long id);
 
-    void accept(Long requestId, String staffCode);
+    RequestDTO accept(Long requestId, String staffCode);
 }
 
