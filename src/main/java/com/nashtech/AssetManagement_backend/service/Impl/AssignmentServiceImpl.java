@@ -201,7 +201,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         AssignmentEntity assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Assignment not found!"));
 
-        if (assignment.getAssignBy().getLocation().equals(location)) { // compare object !!!!
+        if (!assignment.getAssignBy().getLocation().equals(location)) { // compare object !!!!
             throw new BadRequestException("Invalid access!");
         }
 
