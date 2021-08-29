@@ -44,7 +44,8 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDTO update(CategoryDTO dto) {
         CategoryEntity category = categoryRepo.findById(dto.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found!"));
-        if(categoryRepo.existsByName(dto.getName())) {
+
+        if(!dto.getName().equalsIgnoreCase(category.getName()) && categoryRepo.existsByName(dto.getName())) {
             throw new ConflictException("Category is exists!");
         }
 
