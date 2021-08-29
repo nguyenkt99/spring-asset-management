@@ -113,7 +113,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         if (assignmentDTO.getAssignedDate() == null)
             assignment.setAssignedDate(new Date());
         SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(assignTo.getEmail());
+        msg.setTo(assignTo.getUserDetail().getEmail());
         msg.setSubject("New assignment assigned to you");
         msg.setText("Your administrator has assigned you a new assignment: \nAsset " +
                 "code: "+assignment.getAssetEntity().getAssetCode()+
@@ -184,7 +184,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         if (assignmentDTO.getAssignedDate() != null)
             assignment.setAssignedDate(assignmentDTO.getAssignedDate());
         SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(assignTo.getEmail());
+        msg.setTo(assignTo.getUserDetail().getEmail());
         msg.setSubject("Your assignment has been update by Administrator");
         msg.setText("Your administrator has been update your assignment: "+
                 "\nAssignment code: "+assignment.getId()+

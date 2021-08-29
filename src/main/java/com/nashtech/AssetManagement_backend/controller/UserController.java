@@ -59,7 +59,7 @@ public class UserController {
 
     @GetMapping("/disable/{staffCode}")
     public ResponseEntity<Boolean> canDisableUser(@PathVariable("staffCode") String staffCode){
-        return ResponseEntity.ok().body(userService.canDisableUser(staffCode));
+        return userService.canDisableUser(staffCode);
     }
 
     @PutMapping("/disable/{staffCode}")

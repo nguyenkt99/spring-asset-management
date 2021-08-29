@@ -61,7 +61,7 @@ public class RequestServiceImpl implements RequestService {
         if(!requestBy.getUserName().equals(assignment.getAssignTo().getUserName()))
         {
             SimpleMailMessage msg = new SimpleMailMessage();
-            msg.setTo(assignment.getAssignTo().getEmail());
+            msg.setTo(assignment.getAssignTo().getUserDetail().getEmail());
             msg.setSubject("Returning Asset");
             msg.setText("Your administrator need you to return assets to the company: " +
                     "" +
@@ -97,7 +97,7 @@ public class RequestServiceImpl implements RequestService {
         if(request.getRequestBy().getRole().equals(RoleName.ROLE_STAFF))
         {
             SimpleMailMessage msg = new SimpleMailMessage();
-            msg.setTo(request.getAssignmentEntity().getAssignTo().getEmail());
+            msg.setTo(request.getAssignmentEntity().getAssignTo().getUserDetail().getEmail());
             msg.setSubject("Your request ");
             msg.setText("Administrator has been decline your request: " +
                     "\nRequestID: "+request.getId()+
@@ -127,7 +127,7 @@ public class RequestServiceImpl implements RequestService {
         if(request.getRequestBy().getRole().equals(RoleName.ROLE_STAFF))
         {
             SimpleMailMessage msg = new SimpleMailMessage();
-            msg.setTo(assignment.getAssignTo().getEmail());
+            msg.setTo(assignment.getAssignTo().getUserDetail().getEmail());
             msg.setSubject("Your request ");
             msg.setText("Administrator has been accepted your request: " +
                     "\nRequestID: "+request.getId()+

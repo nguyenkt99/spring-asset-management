@@ -5,6 +5,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import com.nashtech.AssetManagement_backend.dto.UserDto;
+import com.nashtech.AssetManagement_backend.entity.UserDetailEntity;
 import com.nashtech.AssetManagement_backend.entity.UsersEntity;
 import com.nashtech.AssetManagement_backend.handleException.RuntimeExceptionHandle;
 import com.nashtech.AssetManagement_backend.payload.request.LoginRequest;
@@ -98,9 +99,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public Boolean getOTP(String email) {
-        UsersEntity entity = userService.findByEmail(email);
+        UserDetailEntity entity = userService.findByEmail(email);
         if (entity != null) {
-            int OTP = otpService.generateOTP(entity.getUserName());
+            int OTP = otpService.generateOTP(entity.getUser().getUserName());
             SimpleMailMessage msg = new SimpleMailMessage();
             msg.setTo(email);
             msg.setSubject("Your OTP is");
@@ -133,19 +134,19 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public Boolean validOTP(String email, int OTP) {
 
-        UsersEntity entity = userService.findByEmail(email);
+        UserDetailEntity entity = userService.findByEmail(email);
         if (OTP >= 0) {
-            int serverOtp = otpService.getOtp(entity.getUserName());
+            int serverOtp = otpService.getOtp(entity.getUser().getUserName());
             if (serverOtp > 0) {
                 if (OTP == serverOtp) {
-                    otpService.clearOTP(entity.getUserName());
+                    otpService.clearOTP(entity.getUser().getUserName());
                     String pass=getRandomPassword();
                     SimpleMailMessage msg = new SimpleMailMessage();
                     msg.setTo(email);
                     msg.setSubject("Your password is");
                     msg.setText("Your password is "+pass);
                     try{
-                        changePasswordAfterfirstLogin(entity.getUserName(),pass);
+                        changePasswordAfterfirstLogin(entity.getUser().getUserName(),pass);
                         javaMailSender.send(msg);
                         return true;
                     }catch (Exception e)

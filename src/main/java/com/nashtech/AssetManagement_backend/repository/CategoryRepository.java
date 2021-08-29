@@ -9,6 +9,7 @@ import java.util.Optional;
 
 public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> {
     boolean existsByPrefixOrName(String prefix, String name);
+    boolean existsByName(String name);
 
     @Query(value = "from CategoryEntity c where lower(c.name) = lower(:name)")
     CategoryEntity getByName(@Param("name") String name);

@@ -20,13 +20,13 @@ public class PasswordGenerator implements ValueGenerator<String> {
         PasswordEncoder encoder = new BCryptPasswordEncoder();
 
         StringBuilder initials = new StringBuilder();
-        for (String s : ((UsersEntity) o).getLastName().split(" ")) {
+        for (String s : ((UsersEntity) o).getUserDetail().getLastName().split(" ")) {
             initials.append(s.charAt(0));
         }
 
         SimpleDateFormat formatter = new SimpleDateFormat("ddMMyyyy");
-        String dateOfBirth = formatter.format(((UsersEntity) o).getDateOfBirth());
-        String username = ((UsersEntity) o).getFirstName().toLowerCase() + initials.toString().toLowerCase();
+        String dateOfBirth = formatter.format(((UsersEntity) o).getUserDetail().getDateOfBirth());
+        String username = ((UsersEntity) o).getUserDetail().getFirstName().toLowerCase() + initials.toString().toLowerCase();
         Query query = session.createQuery("from UsersEntity where userName like :name order by id DESC")
                 .setParameter("name", "%" + username + "%").setFlushMode(FlushModeType.COMMIT);
 

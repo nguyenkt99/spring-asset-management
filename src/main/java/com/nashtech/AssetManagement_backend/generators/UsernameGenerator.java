@@ -20,11 +20,11 @@ public class UsernameGenerator implements ValueGenerator<String> {
     public String generateValue(Session session, Object o) {
 
         StringBuilder initials = new StringBuilder();
-        for (String s : ((UsersEntity) o).getLastName().split(" ")) {
+        for (String s : ((UsersEntity) o).getUserDetail().getLastName().split(" ")) {
             initials.append(s.charAt(0));
         }
 
-        String username = ((UsersEntity) o).getFirstName().toLowerCase() + initials.toString().toLowerCase();
+        String username = ((UsersEntity) o).getUserDetail().getFirstName().toLowerCase() + initials.toString().toLowerCase();
 
 
         Query query = session.createQuery("from UsersEntity where userName like :name order by id DESC").setParameter("name", "%" + username + "%").setFlushMode(FlushModeType.COMMIT);

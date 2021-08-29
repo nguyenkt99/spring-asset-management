@@ -7,4 +7,6 @@ import java.util.List;
 public interface CategoryService {
     List<CategoryDTO> showAll();
     CategoryDTO create(CategoryDTO dto);
+    CategoryDTO update(CategoryDTO dto);
+    void delete(Long categoryId);
 }

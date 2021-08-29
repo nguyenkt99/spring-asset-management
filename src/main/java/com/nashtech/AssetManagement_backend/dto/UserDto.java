@@ -1,11 +1,7 @@
 package com.nashtech.AssetManagement_backend.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.nashtech.AssetManagement_backend.entity.Gender;
-import com.nashtech.AssetManagement_backend.entity.Location;
-import com.nashtech.AssetManagement_backend.entity.RoleName;
-import com.nashtech.AssetManagement_backend.entity.UserState;
-import com.nashtech.AssetManagement_backend.entity.UsersEntity;
+import com.nashtech.AssetManagement_backend.entity.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -58,37 +54,39 @@ public class UserDto {
     @NotNull(message = "Role name can not be null")
     private RoleName type;
 
-    private UserState state ;
+    private UserState state;
 
     public UserDto toDto(UsersEntity entity) {
         UserDto dto = new UserDto();
-        dto.setLastName(entity.getLastName());
-        dto.setFirstName(entity.getFirstName());
-        dto.setDateOfBirth(entity.getDateOfBirth());
-        dto.setJoinedDate(entity.getJoinedDate());
+        dto.setLastName(entity.getUserDetail().getLastName());
+        dto.setFirstName(entity.getUserDetail().getFirstName());
+        dto.setDateOfBirth(entity.getUserDetail().getDateOfBirth());
+        dto.setJoinedDate(entity.getUserDetail().getJoinedDate());
         dto.setLocation(entity.getLocation().getName());
         dto.setType(entity.getRole().getName());
         dto.setState(entity.getState());
-        dto.setGender(entity.getGender());
+        dto.setGender(entity.getUserDetail().getGender());
         dto.setStaffCode(entity.getStaffCode());
         dto.setUsername(entity.getUserName());
         dto.setFirstLogin(entity.isFirstLogin());
-        dto.setEmail(entity.getEmail());
-        dto.setFullName(entity.getFirstName() + " " + entity.getLastName());
+        dto.setEmail(entity.getUserDetail().getEmail());
+        dto.setFullName(entity.getUserDetail().getFirstName() + " " + entity.getUserDetail().getLastName());
         return dto;
     }
 
     public UsersEntity toEntity(UserDto dto) {
         UsersEntity entity = new UsersEntity();
-        entity.setFirstName(dto.getFirstName());
-        entity.setLastName(dto.getLastName());
-        entity.setDateOfBirth(dto.getDateOfBirth());
-        entity.setJoinedDate(dto.getJoinedDate());
-        entity.setGender(dto.getGender());
-//        entity.setLocation(dto.getLocation());
+        UserDetailEntity userDetail = new UserDetailEntity();
+        userDetail.setUser(entity);
+        userDetail.setFirstName(dto.getFirstName());
+        userDetail.setLastName(dto.getLastName());
+        userDetail.setDateOfBirth(dto.getDateOfBirth());
+        userDetail.setJoinedDate(dto.getJoinedDate());
+        userDetail.setGender(dto.getGender());
+        userDetail.setEmail(dto.getEmail());
         entity.setFirstLogin(dto.isFirstLogin);
         entity.setState(dto.getState());
-        entity.setEmail(dto.getEmail());
+        entity.setUserDetail(userDetail);
         return entity;
     }
 

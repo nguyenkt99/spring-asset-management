@@ -9,11 +9,11 @@ import com.nashtech.AssetManagement_backend.exception.ResourceNotFoundException;
 import com.nashtech.AssetManagement_backend.handleException.NotFoundExecptionHandle;
 import com.nashtech.AssetManagement_backend.repository.LocationRepository;
 import com.nashtech.AssetManagement_backend.repository.RoleRepository;
+import com.nashtech.AssetManagement_backend.repository.UserDetailRepository;
 import com.nashtech.AssetManagement_backend.repository.UserRepository;
 import com.nashtech.AssetManagement_backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +30,9 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
 
     @Autowired
+    UserDetailRepository userDetailRepository;
+
+    @Autowired
     RoleRepository roleRepository;
 
     @Autowired
@@ -42,8 +45,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UsersEntity findByEmail(String email) {
-        return userRepository.findByEmail(email).orElseThrow(()-> new NotFoundExecptionHandle("Could not found user: " + email));
+    public UserDetailEntity findByEmail(String email) {
+        return userDetailRepository.findByEmail(email).orElseThrow(()-> new NotFoundExecptionHandle("Could not found user: " + email));
     }
 
     @Override
@@ -80,15 +83,15 @@ public class UserServiceImpl implements UserService {
         UsersEntity usersEntity = userDto.toEntity(userDto);
         usersEntity.setLocation(location);
         // validate
-        if (usersEntity.getJoinedDate().before(usersEntity.getDateOfBirth()))
+        if (usersEntity.getUserDetail().getJoinedDate().before(usersEntity.getUserDetail().getDateOfBirth()))
             throw new InvalidInputException(
                     "Joined date is not later than Date of Birth. Please select a different date");
-        if (!checkAge(usersEntity.getDateOfBirth(), usersEntity.getJoinedDate()))
+        if (!checkAge(usersEntity.getUserDetail().getDateOfBirth(), usersEntity.getUserDetail().getJoinedDate()))
             throw new InvalidInputException("User is under 18. Please select a different date");
-        int day = getDayNumberOld(usersEntity.getJoinedDate());
+        int day = getDayNumberOld(usersEntity.getUserDetail().getJoinedDate());
         if (day == 7 || day == 1)
             throw new InvalidInputException("Joined date is Saturday or Sunday. Please select a different date");
-        if(userRepository.existsByEmail(userDto.getEmail()))
+        if(userDetailRepository.existsByEmail(userDto.getEmail()))
             throw new InvalidInputException("Email is exists");
         usersEntity.setFirstLogin(true);
         RolesEntity rolesEntity = roleRepository.getByName(userDto.getType());
@@ -99,22 +102,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> retrieveUsers(LocationEntity location) {
-        List<UsersEntity> usersEntities = userRepository.findAllByLocationAndState(location, UserState.Enable);
+//        List<UsersEntity> usersEntities = userRepository.findAllByLocationAndState(location, UserState.Enable);
+        List<UsersEntity> usersEntities = userRepository.findAllByLocation(location);
         usersEntities = usersEntities.stream()
-                .sorted(Comparator.comparing(o -> (o.getFirstName() + ' ' + o.getLastName())))
+//                .sorted(Comparator.comparing(o -> (o.getUserDetail().getFirstName() + ' ' + o.getUserDetail().getLastName())))
+                .sorted(Comparator.comparing(o -> (o.getStaffCode())))
                 .collect(Collectors.toList());
         return new UserDto().toListDto(usersEntities);
     }
 
-//    @Override
-//    public List<UserDto> retrieveUsers(Pageable pageable) {
-//        List<UsersEntity> usersEntities = new ArrayList<>();
-//        Page<UsersEntity> page;
-//        page = userRepository.findAll(pageable);
-//
-//        usersEntities = page.getContent();
-//        return new UserDto().toListDto(usersEntities);
-//    }
 
     @Override
     public UserDto getUserByStaffCode(String staffCode, LocationEntity location) throws ResourceNotFoundException {
@@ -136,20 +132,20 @@ public class UserServiceImpl implements UserService {
         int day = getDayNumberOld(userDto.getJoinedDate());
         if (day == 7 || day == 1)
             throw new InvalidInputException("Joined date is Saturday or Sunday. Please select a different date");
-        if(existUser.getEmail()!=null)
+        if(existUser.getUserDetail().getEmail()!=null)
         {
-            if(!existUser.getEmail().equals(userDto.getEmail()))
-                if(userRepository.existsByEmail(userDto.getEmail()))
+            if(!existUser.getUserDetail().getEmail().equals(userDto.getEmail()))
+                if(userDetailRepository.existsByEmail(userDto.getEmail()))
                     throw new InvalidInputException("Email is exists");
         }else
         {
-            if(userRepository.existsByEmail(userDto.getEmail()))
+            if(userDetailRepository.existsByEmail(userDto.getEmail()))
                 throw new InvalidInputException("Email is exists");
         }
-        existUser.setDateOfBirth(userDto.getDateOfBirth());
-        existUser.setGender(userDto.getGender());
-        existUser.setJoinedDate(userDto.getJoinedDate());
-        existUser.setEmail(userDto.getEmail());
+        existUser.getUserDetail().setDateOfBirth(userDto.getDateOfBirth());
+        existUser.getUserDetail().setGender(userDto.getGender());
+        existUser.getUserDetail().setJoinedDate(userDto.getJoinedDate());
+        existUser.getUserDetail().setEmail(userDto.getEmail());
 
         RolesEntity rolesEntity = roleRepository.getByName(userDto.getType());
         existUser.setRole(rolesEntity);
@@ -166,10 +162,7 @@ public class UserServiceImpl implements UserService {
     private final String DISABLE_CONFLICT = "There are valid assignments belonging to this user. Please close all assignments before disabling user.";
 
     @Override
-    public Boolean canDisableUser(String staffCode) {
-//        return !(userRepository.findByStaffCode(staffCode)
-//                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND)).getAssignmentsBys().size() > 0);
-
+    public ResponseEntity<Boolean> canDisableUser(String staffCode) {
         UsersEntity usersEntity = userRepository.findByStaffCode(staffCode)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
         for(AssignmentEntity assignment : usersEntity.getAssignmentTos()) {
@@ -178,7 +171,12 @@ public class UserServiceImpl implements UserService {
                 throw new ConflictException(DISABLE_CONFLICT);
             }
         }
-        return true;
+
+        if(usersEntity.getAssignmentTos().size() > 0) {
+            return ResponseEntity.ok(true); //200 for disable
+        } else {
+            return ResponseEntity.accepted().body(true);// 202 for delete
+        }
     }
 
     @Override
@@ -193,8 +191,13 @@ public class UserServiceImpl implements UserService {
                 throw new ConflictException(DISABLE_CONFLICT);
             }
         }
-        usersEntity.setState(UserState.Disabled);
-        userRepository.save(usersEntity);
+
+        if (usersEntity.getAssignmentTos().size() > 0) {
+            usersEntity.setState(UserState.Disabled);
+            userRepository.save(usersEntity);
+        } else {
+            userRepository.delete(usersEntity);
+        }
         return true;
     }
 

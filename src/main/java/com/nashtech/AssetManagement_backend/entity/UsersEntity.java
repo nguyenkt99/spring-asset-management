@@ -11,6 +11,7 @@ import org.hibernate.annotations.*;
 import org.hibernate.annotations.Parameter;
 
 import javax.persistence.*;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -36,15 +37,6 @@ public class UsersEntity {
     @Column(name = "staff_code")
     private String staffCode;
 
-    @Column(name = "first_name")
-    private String firstName;
-
-    @Column(name = "last_name")
-    private String lastName;
-
-    @Enumerated(EnumType.STRING)
-    @Column(length = 10,name = "gender")
-    private Gender gender;
 
     @GeneratorType(type = UsernameGenerator.class, when = GenerationTime.INSERT)
     @Column(name = "user_name")
@@ -53,15 +45,6 @@ public class UsersEntity {
     @Size(min=6, max = 100)
     @GeneratorType(type = PasswordGenerator.class, when = GenerationTime.INSERT)
     private String password;
-
-    @Column(name = "date_of_birth")
-    private Date dateOfBirth;
-
-    @Column(name = "joined_date")
-    private Date joinedDate;
-
-    @Column(name = "email")
-    private String email;
 
     @Column(name = "is_first_login")
     private boolean isFirstLogin;
@@ -90,6 +73,10 @@ public class UsersEntity {
     @Enumerated(EnumType.STRING)
     @Column(length = 60)
     private UserState state;
+
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @PrimaryKeyJoinColumn
+    private UserDetailEntity userDetail;
 
     @PrePersist
     protected void onCreate() {
