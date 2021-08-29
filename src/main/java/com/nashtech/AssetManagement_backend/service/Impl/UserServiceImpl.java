@@ -172,7 +172,7 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        if(usersEntity.getAssignmentTos().size() > 0) {
+        if(usersEntity.getAssignmentTos().size() > 0 || usersEntity.getAssignmentsBys().size() > 0) {
             return ResponseEntity.ok(true); //200 for disable
         } else {
             return ResponseEntity.accepted().body(true);// 202 for delete
