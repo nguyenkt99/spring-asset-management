@@ -62,9 +62,9 @@ public class UserDto {
         dto.setFirstName(entity.getUserDetail().getFirstName());
         dto.setDateOfBirth(entity.getUserDetail().getDateOfBirth());
         dto.setJoinedDate(entity.getUserDetail().getJoinedDate());
-        dto.setLocation(entity.getLocation().getName());
+        dto.setLocation(entity.getUserDetail().getLocation().getName());
         dto.setType(entity.getRole().getName());
-        dto.setState(entity.getState());
+        dto.setState(entity.getUserDetail().getState());
         dto.setGender(entity.getUserDetail().getGender());
         dto.setStaffCode(entity.getStaffCode());
         dto.setUsername(entity.getUserName());
@@ -84,8 +84,8 @@ public class UserDto {
         userDetail.setJoinedDate(dto.getJoinedDate());
         userDetail.setGender(dto.getGender());
         userDetail.setEmail(dto.getEmail());
+        userDetail.setState(dto.getState());
         entity.setFirstLogin(dto.isFirstLogin);
-        entity.setState(dto.getState());
         entity.setUserDetail(userDetail);
         return entity;
     }

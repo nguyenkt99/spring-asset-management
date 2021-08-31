@@ -9,7 +9,6 @@ import org.hibernate.validator.constraints.Length;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CategoryDTO {
-    private Long id;
     @Length(min = 1, max = 255, message = "length 1-255")
     private String name;
     @Length(min = 2, max = 2, message = "length is 2")
@@ -19,7 +18,6 @@ public class CategoryDTO {
         if (cate == null)
             return null;
         CategoryDTO dto = new CategoryDTO();
-        dto.setId(cate.getId());
         dto.setName(cate.getName());
         dto.setPrefix(cate.getPrefix());
         return dto;

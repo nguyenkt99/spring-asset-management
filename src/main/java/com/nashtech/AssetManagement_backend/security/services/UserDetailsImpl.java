@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
+import com.nashtech.AssetManagement_backend.entity.UserState;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,14 +25,17 @@ public class UserDetailsImpl implements UserDetails {
 
     private boolean isFirstLogin;
 
+    private UserState state;
+
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserDetailsImpl(String staffCode, String username, String password, boolean isFirstLogin,
+    public UserDetailsImpl(String staffCode, String username, String password, boolean isFirstLogin, UserState state,
                 Collection<? extends GrantedAuthority> authorities) {
         this.staffCode = staffCode;
         this.username = username;
         this.password = password;
         this.isFirstLogin = isFirstLogin;
+        this.state = state;
         this.authorities = authorities;
     }
 
@@ -44,6 +48,7 @@ public class UserDetailsImpl implements UserDetails {
             user.getUserName(),
             user.getPassword(),
             user.isFirstLogin(),
+            user.getUserDetail().getState(),
             authorities); //authorities
     }
 
@@ -58,6 +63,10 @@ public class UserDetailsImpl implements UserDetails {
 
     public Boolean isFirstLogin() {
         return this.isFirstLogin;
+    }
+
+    public UserState getState() {
+        return state;
     }
 
     @Override

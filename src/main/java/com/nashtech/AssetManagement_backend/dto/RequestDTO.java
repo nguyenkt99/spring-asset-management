@@ -36,9 +36,9 @@ public class RequestDTO {
         this.state = entity.getState();
         this.requestedDate = entity.getRequestedDate();
         this.returnedDate = entity.getReturnedDate();
-        this.requestBy = entity.getRequestBy().getUserName();
+        this.requestBy = entity.getRequestBy().getUser().getUserName();
         if(entity.getAcceptBy() != null)
-            this.acceptBy = entity.getAcceptBy().getUserName();
+            this.acceptBy = entity.getAcceptBy().getUser().getUserName();
         this.assignmentId = entity.getAssignmentEntity().getId();
         this.assetCode = entity.getAssignmentEntity().getAssetEntity().getAssetCode();
         this.assetName = entity.getAssignmentEntity().getAssetEntity().getAssetName();

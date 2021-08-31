@@ -7,8 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> {
-    boolean existsByPrefixOrName(String prefix, String name);
+public interface CategoryRepository extends JpaRepository<CategoryEntity, String> {
     boolean existsByName(String name);
 
     @Query(value = "from CategoryEntity c where lower(c.name) = lower(:name)")

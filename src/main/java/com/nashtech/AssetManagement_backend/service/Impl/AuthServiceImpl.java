@@ -6,7 +6,9 @@ import java.util.stream.Collectors;
 
 import com.nashtech.AssetManagement_backend.dto.UserDto;
 import com.nashtech.AssetManagement_backend.entity.UserDetailEntity;
+import com.nashtech.AssetManagement_backend.entity.UserState;
 import com.nashtech.AssetManagement_backend.entity.UsersEntity;
+import com.nashtech.AssetManagement_backend.exception.ConflictException;
 import com.nashtech.AssetManagement_backend.handleException.RuntimeExceptionHandle;
 import com.nashtech.AssetManagement_backend.payload.request.LoginRequest;
 import com.nashtech.AssetManagement_backend.payload.response.JwtResponse;
@@ -66,6 +68,11 @@ public class AuthServiceImpl implements AuthService {
         String jwt = jwtUtils.generateJwtToken(authentication);
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        if(userDetails.getState().equals(UserState.Disabled)) {
+            throw new ConflictException("Account is disabled!");
+        }
+
         List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
                 .collect(Collectors.toList());
 

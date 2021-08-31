@@ -39,7 +39,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     JavaMailSender javaMailSender;
     @Override
     public List<AssignmentDTO> getAllByAdmimLocation(String username) {
-        LocationEntity location = userService.findByUserName(username).getLocation();
+        LocationEntity location = userService.findByUserName(username).getUserDetail().getLocation();
         List<AssignmentDTO> assignmentDTOs = assignmentRepository.findAllByAdmimLocation(location.getId())
                 .stream().map(AssignmentDTO::toDTO).collect(Collectors.toList());
         return assignmentDTOs;
@@ -76,10 +76,10 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Override
     public AssignmentDTO save(AssignmentDTO assignmentDTO) {
         AssignmentEntity assignment = AssignmentDTO.toEntity(assignmentDTO);
-        UsersEntity assignTo = userRepository.findByUserName(assignmentDTO.getAssignedTo())
-                .orElseThrow(() -> new ResourceNotFoundException("AssignTo not found!"));
-        UsersEntity assignBy = userRepository.findByUserName(assignmentDTO.getAssignedBy())
-                .orElseThrow(() -> new ResourceNotFoundException("AssignBy not found!"));
+        UserDetailEntity assignTo = userRepository.findByUserName(assignmentDTO.getAssignedTo())
+                .orElseThrow(() -> new ResourceNotFoundException("AssignTo not found!")).getUserDetail();
+        UserDetailEntity assignBy = userRepository.findByUserName(assignmentDTO.getAssignedBy())
+                .orElseThrow(() -> new ResourceNotFoundException("AssignBy not found!")).getUserDetail();
 
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         Date todayDate = null;
@@ -113,7 +113,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         if (assignmentDTO.getAssignedDate() == null)
             assignment.setAssignedDate(new Date());
         SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(assignTo.getUserDetail().getEmail());
+        msg.setTo(assignTo.getEmail());
         msg.setSubject("New assignment assigned to you");
         msg.setText("Your administrator has assigned you a new assignment: \nAsset " +
                 "code: "+assignment.getAssetEntity().getAssetCode()+
@@ -146,8 +146,8 @@ public class AssignmentServiceImpl implements AssignmentService {
             throw new ConflictException("The assigned date is current or future!");
         }
 
-        UsersEntity assignTo = assignment.getAssignTo();
-        UsersEntity assignBy;
+        UserDetailEntity assignTo = assignment.getAssignTo();
+        UserDetailEntity assignBy;
 
         // case: new asset
         if (!assignmentDTO.getAssetCode().equalsIgnoreCase(assignment.getAssetEntity().getAssetCode())) {
@@ -162,16 +162,16 @@ public class AssignmentServiceImpl implements AssignmentService {
         }
 
         // case: new assign to
-        if (!assignment.getAssignTo().getUserName().equalsIgnoreCase(assignmentDTO.getAssignedTo())) {
+        if (!assignment.getAssignTo().getUser().getUserName().equalsIgnoreCase(assignmentDTO.getAssignedTo())) {
             assignTo = userRepository.findByUserName(assignmentDTO.getAssignedTo())
-                    .orElseThrow(() -> new ResourceNotFoundException("AssignTo not found!"));
+                    .orElseThrow(() -> new ResourceNotFoundException("AssignTo not found!")).getUserDetail();
             assignment.setAssignTo(assignTo);
         }
 
         // case: new assign by
-        if (!assignment.getAssignBy().getUserName().equalsIgnoreCase(assignmentDTO.getAssignedBy())) {
+        if (!assignment.getAssignBy().getUser().getUserName().equalsIgnoreCase(assignmentDTO.getAssignedBy())) {
             assignBy = userRepository.findByUserName(assignmentDTO.getAssignedBy())
-                    .orElseThrow(() -> new ResourceNotFoundException("AssignBy not found!"));
+                    .orElseThrow(() -> new ResourceNotFoundException("AssignBy not found!")).getUserDetail();
             assignment.setAssignBy(assignBy);
 
             // check location
@@ -184,7 +184,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         if (assignmentDTO.getAssignedDate() != null)
             assignment.setAssignedDate(assignmentDTO.getAssignedDate());
         SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(assignTo.getUserDetail().getEmail());
+        msg.setTo(assignTo.getEmail());
         msg.setSubject("Your assignment has been update by Administrator");
         msg.setText("Your administrator has been update your assignment: "+
                 "\nAssignment code: "+assignment.getId()+
@@ -222,7 +222,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     public AssignmentDTO updateStateAssignment(Long assignmentId, String username, AssignmentState state) {
         AssignmentEntity assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Assignment not found!"));
-        if (!assignment.getAssignTo().getUserName().equals(username))
+        if (!assignment.getAssignTo().getUser().getUserName().equals(username))
             throw new BadRequestException("Assignment updated when it assigns you!");
         if (assignment.getState() != AssignmentState.WAITING_FOR_ACCEPTANCE)
             throw new BadRequestException("Assignment updated when state is Waiting for acceptance!");

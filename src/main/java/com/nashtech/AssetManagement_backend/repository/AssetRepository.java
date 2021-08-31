@@ -22,6 +22,6 @@ public interface AssetRepository extends JpaRepository<AssetEntity, String> {
             "from asset a \n" +
             "where a.category_id = ?1 and a.location_id = ?2 \n" +
             "group by a.state \n")
-    List<StateQuantity> countState(long categoryId, long location);
+    List<StateQuantity> countState(String prefix, long location);
 
 }

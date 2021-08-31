@@ -25,15 +25,15 @@ public class CategoryController {
         return ResponseEntity.ok().body(categoryService.create(dto));
     }
 
-    @PutMapping("/{categoryId}")
-    public CategoryDTO editCategory(@PathVariable long categoryId, @RequestBody CategoryDTO categoryDTO) {
-        categoryDTO.setId(categoryId);
+    @PutMapping("/{prefix}")
+    public CategoryDTO editCategory(@PathVariable String prefix, @RequestBody CategoryDTO categoryDTO) {
+        categoryDTO.setPrefix(prefix);
         return categoryService.update(categoryDTO);
     }
 
-    @DeleteMapping("/{categoryId}")
-    public void deleteCategory(@PathVariable long categoryId) {
-        categoryService.delete(categoryId);
+    @DeleteMapping("/{prefix}")
+    public void deleteCategory(@PathVariable String prefix) {
+        categoryService.delete(prefix);
     }
 
 }

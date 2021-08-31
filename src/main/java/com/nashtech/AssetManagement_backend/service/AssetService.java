@@ -19,5 +19,5 @@ public interface AssetService {
 
     AssetDTO update(AssetDTO dto);
 
-    int countByCategory(Long categoryId, String username);
+    int countByCategory(String prefix, String username);
 }

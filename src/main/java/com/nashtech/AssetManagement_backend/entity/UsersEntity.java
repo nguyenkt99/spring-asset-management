@@ -25,7 +25,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "users")
+@Table(name = "accounts")
 public class UsersEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
@@ -53,33 +53,10 @@ public class UsersEntity {
     @JoinColumn(name="role_id")
     private RolesEntity role;
 
-    @OneToMany(mappedBy = "assignTo")
-    private List<AssignmentEntity> assignmentTos = new ArrayList<>();
-
-    @OneToMany(mappedBy = "assignBy")
-    private List<AssignmentEntity> assignmentsBys = new ArrayList<>();
-
-    @OneToMany(mappedBy = "requestBy")
-    private List<RequestEntity> requestBys = new ArrayList<>();
-
-    @OneToMany(mappedBy = "acceptBy")
-    private List<RequestEntity> acceptBys = new ArrayList<>();
-
-    @ManyToOne
-    @JoinColumn(name="location_id")
-    private LocationEntity location;
-
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(length = 60)
-    private UserState state;
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @PrimaryKeyJoinColumn
     private UserDetailEntity userDetail;
 
-    @PrePersist
-    protected void onCreate() {
-      this.state = UserState.Enable;
-    }
+
 }

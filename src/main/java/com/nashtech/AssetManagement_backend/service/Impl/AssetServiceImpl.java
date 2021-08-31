@@ -36,7 +36,7 @@ public class AssetServiceImpl implements AssetService {
         CategoryEntity cate = categoryRepo.findByPrefix(dto.getCategoryPrefix())
                 .orElseThrow(() -> new ResourceNotFoundException(CATEGORY_NOT_FOUND_ERROR));
         LocationEntity location = userRepo.findByUserName(username)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_ERROR)).getLocation();
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_ERROR)).getUserDetail().getLocation();
         if (dto.getState() != AssetState.NOT_AVAILABLE && dto.getState() != AssetState.AVAILABLE)
             throw new BadRequestException(ASSET_BAD_STATE_ERROR);
         AssetEntity asset = AssetDTO.toEntity(dto);
@@ -49,7 +49,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public List<AssetDTO> findAllByAdminLocation(String username) {
         LocationEntity location = userRepo.findByUserName(username)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_ERROR)).getLocation();
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_ERROR)).getUserDetail().getLocation();
         List<AssetDTO> AssetDTOs = assetRepo.findAll().stream().filter(p -> p.getLocation().equals(location))
             .map(AssetDTO::toDTO).collect(Collectors.toList());
         AssetDTOs.sort(Comparator.comparing(AssetDTO::getAssetCode));
@@ -103,9 +103,9 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public int countByCategory(Long categoryId, String username) {
-        LocationEntity location = userRepo.findByUserName(username).get().getLocation();
-        CategoryEntity category = categoryRepo.findById(categoryId).get();
+    public int countByCategory(String prefix, String username) {
+        LocationEntity location = userRepo.findByUserName(username).get().getUserDetail().getLocation();
+        CategoryEntity category = categoryRepo.findById(prefix).get();
         return assetRepo.countByCategoryEntityAndLocation(category, location);
     }
 }

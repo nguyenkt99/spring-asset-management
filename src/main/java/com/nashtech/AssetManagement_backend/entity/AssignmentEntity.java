@@ -39,11 +39,11 @@ public class AssignmentEntity {
 
     @ManyToOne
     @JoinColumn(name="assign_to")
-    private UsersEntity assignTo;
+    private UserDetailEntity assignTo;
 
     @ManyToOne
     @JoinColumn(name="assign_by")
-    private UsersEntity assignBy;
+    private UserDetailEntity assignBy;
 
     @OneToMany(mappedBy = "assignmentEntity")
     private List<RequestEntity> requests = new ArrayList<>();

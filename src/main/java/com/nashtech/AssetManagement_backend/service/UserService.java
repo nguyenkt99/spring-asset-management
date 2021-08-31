@@ -32,9 +32,9 @@ public interface UserService {
 
     LocationEntity getLocationByUserName(String userName);
 
-    ResponseEntity<Boolean> canDisableUser(String staffCode);
+    ResponseEntity<Boolean> canDisableUser(String staffCode,String admin);
 
-    Boolean disableUser(String staffCode);
+    Boolean disableUser(String staffCode, String admin);
 
     UserDto getProfile(String username);
 

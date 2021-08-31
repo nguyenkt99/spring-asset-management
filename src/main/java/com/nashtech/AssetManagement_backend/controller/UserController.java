@@ -58,13 +58,13 @@ public class UserController {
     }
 
     @GetMapping("/disable/{staffCode}")
-    public ResponseEntity<Boolean> canDisableUser(@PathVariable("staffCode") String staffCode){
-        return userService.canDisableUser(staffCode);
+    public ResponseEntity<Boolean> canDisableUser(@PathVariable("staffCode") String staffCode,Authentication authentication){
+        return userService.canDisableUser(staffCode,authentication.getName());
     }
 
     @PutMapping("/disable/{staffCode}")
-    public ResponseEntity<Boolean> disableUser(@PathVariable("staffCode") String staffCode){
-        return ResponseEntity.ok().body(userService.disableUser(staffCode));
+    public ResponseEntity<Boolean> disableUser(@PathVariable("staffCode") String staffCode, Authentication authentication){
+        return ResponseEntity.ok().body(userService.disableUser(staffCode, authentication.getName()));
     }
 
 }

@@ -79,9 +79,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto saveUser(UserDto userDto, String username) {
         LocationEntity location = userRepository.findByUserName(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found!")).getLocation();
+                .orElseThrow(() -> new ResourceNotFoundException("User not found!")).getUserDetail().getLocation();
         UsersEntity usersEntity = userDto.toEntity(userDto);
-        usersEntity.setLocation(location);
+        usersEntity.getUserDetail().setLocation(location);
         // validate
         if (usersEntity.getUserDetail().getJoinedDate().before(usersEntity.getUserDetail().getDateOfBirth()))
             throw new InvalidInputException(
@@ -103,7 +103,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDto> retrieveUsers(LocationEntity location) {
 //        List<UsersEntity> usersEntities = userRepository.findAllByLocationAndState(location, UserState.Enable);
-        List<UsersEntity> usersEntities = userRepository.findAllByLocation(location);
+        List<UsersEntity> usersEntities = userRepository.findAllByUserDetail_Location(location);
         usersEntities = usersEntities.stream()
 //                .sorted(Comparator.comparing(o -> (o.getUserDetail().getFirstName() + ' ' + o.getUserDetail().getLastName())))
                 .sorted(Comparator.comparing(o -> (o.getStaffCode())))
@@ -114,7 +114,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserByStaffCode(String staffCode, LocationEntity location) throws ResourceNotFoundException {
-        UsersEntity user = userRepository.findByStaffCodeAndLocation(staffCode, location)
+        UsersEntity user = userRepository.findByStaffCodeAndUserDetail_Location(staffCode, location)
                 .orElseThrow(() -> new ResourceNotFoundException("user not found for this staff code: " + staffCode));
         return new UserDto().toDto(user);
     }
@@ -155,16 +155,20 @@ public class UserServiceImpl implements UserService {
     }
 
     public LocationEntity getLocationByUserName(String userName) {
-        return userRepository.getByUserName(userName).getLocation();
+        return userRepository.getByUserName(userName).getUserDetail().getLocation();
     }
 
     private final String USER_NOT_FOUND = "user is not found.";
     private final String DISABLE_CONFLICT = "There are valid assignments belonging to this user. Please close all assignments before disabling user.";
 
     @Override
-    public ResponseEntity<Boolean> canDisableUser(String staffCode) {
-        UsersEntity usersEntity = userRepository.findByStaffCode(staffCode)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
+    public ResponseEntity<Boolean> canDisableUser(String staffCode, String admin) {
+        UserDetailEntity usersEntity = userRepository.findByStaffCode(staffCode)
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND)).getUserDetail();
+        if(usersEntity.getUser().getUserName().equals(admin)) {
+            throw new BadRequestException("You cannot disable yourself!");
+        }
+
         for(AssignmentEntity assignment : usersEntity.getAssignmentTos()) {
             if(assignment.getState().equals(AssignmentState.WAITING_FOR_ACCEPTANCE) ||
                     assignment.getState().equals(AssignmentState.ACCEPTED)) {
@@ -180,20 +184,24 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean disableUser(String staffCode) {
+    public Boolean disableUser(String staffCode, String admin) {
         UsersEntity usersEntity = userRepository.findByStaffCode(staffCode)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
 
+        if(usersEntity.getUserName().equals(admin)) {
+            throw new BadRequestException("You cannot disable yourself!");
+        }
+
         // admin cannot disable user when user has assignment in WAITING_FOR_ACCEPTANCE or ACCEPTED state
-        for(AssignmentEntity assignment : usersEntity.getAssignmentTos()) {
+        for(AssignmentEntity assignment : usersEntity.getUserDetail().getAssignmentTos()) {
             if(assignment.getState().equals(AssignmentState.WAITING_FOR_ACCEPTANCE) ||
                     assignment.getState().equals(AssignmentState.ACCEPTED)) {
                 throw new ConflictException(DISABLE_CONFLICT);
             }
         }
 
-        if (usersEntity.getAssignmentTos().size() > 0) {
-            usersEntity.setState(UserState.Disabled);
+        if (usersEntity.getUserDetail().getAssignmentTos().size() > 0) {
+            usersEntity.getUserDetail().setState(UserState.Disabled);
             userRepository.save(usersEntity);
         } else {
             userRepository.delete(usersEntity);

@@ -54,8 +54,8 @@ public class AssignmentDTO {
         dto.setAssetName(assign.getAssetEntity().getAssetName());
         dto.setCategory(assign.getAssetEntity().getCategoryEntity().getName());
         dto.setSpecfication(assign.getAssetEntity().getSpecification());
-        dto.setAssignedTo(assign.getAssignTo().getUserName());
-        dto.setAssignedBy(assign.getAssignBy().getUserName());
+        dto.setAssignedTo(assign.getAssignTo().getUser().getUserName());
+        dto.setAssignedBy(assign.getAssignBy().getUser().getUserName());
         dto.setAssignedDate(assign.getAssignedDate());
 //        if (assign.getState().equals(AssignmentState.COMPLETED))
         if(assign.getRequests().size() > 0)

@@ -19,14 +19,11 @@ import java.util.List;
 @Table(name = "categories")
 public class CategoryEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "prefix")
+    private String prefix;
 
     @Column(name ="name", unique = true)
     private String name;
-
-    @Column(name = "prefix", unique = true)
-    private String prefix;
 
     @OneToMany(mappedBy = "categoryEntity")
     private List<AssetEntity> assetEntities = new ArrayList<>();

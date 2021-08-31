@@ -47,8 +47,8 @@ public class RequestServiceImpl implements RequestService {
             throw new ConflictException("Request has already been created!");
         }
 
-        UsersEntity requestBy = userRepository.getByUserName(requestDTO.getRequestBy());
-        if(!requestBy.getRole().getName().equals(RoleName.ROLE_ADMIN)) { // requestedBy is not admin
+        UserDetailEntity requestBy = userRepository.getByUserName(requestDTO.getRequestBy()).getUserDetail();
+        if(!requestBy.getUser().getRole().getName().equals(RoleName.ROLE_ADMIN)) { // requestedBy is not admin
             if(!requestBy.equals(assignment.getAssignTo())) { // requestedBy is also not assignedTo
                 throw new ConflictException("RequestedBy must be admin or assignee!");
             }
@@ -58,10 +58,10 @@ public class RequestServiceImpl implements RequestService {
         request.setAssignmentEntity(assignment);
         request.setRequestBy(requestBy);
         request.setState(RequestState.WAITING_FOR_RETURNING);
-        if(!requestBy.getUserName().equals(assignment.getAssignTo().getUserName()))
+        if(!requestBy.getUser().getUserName().equals(assignment.getAssignTo().getUser().getUserName()))
         {
             SimpleMailMessage msg = new SimpleMailMessage();
-            msg.setTo(assignment.getAssignTo().getUserDetail().getEmail());
+            msg.setTo(assignment.getAssignTo().getEmail());
             msg.setSubject("Returning Asset");
             msg.setText("Your administrator need you to return assets to the company: " +
                     "" +
@@ -75,12 +75,14 @@ public class RequestServiceImpl implements RequestService {
                     "\nAdministrator");
             javaMailSender.send(msg);
         }
+        assignment.setState(AssignmentState.WAITING_FOR_RETURNING);
+        request.setAssignmentEntity(assignment);
         return new RequestDTO(requestRepository.save(request));
     }
 
     @Override
     public List<RequestDTO> getAllByAdminLocation(String adminUsername) {
-        LocationEntity location = userRepository.findByUserName(adminUsername).get().getLocation();
+        LocationEntity location = userRepository.findByUserName(adminUsername).get().getUserDetail().getLocation();
         List<RequestDTO> requestDTOs = requestRepository.findAll().stream()
                 .filter(request -> (request.getRequestBy().getLocation().equals(location)))
                 .sorted((o1, o2) -> (int) (o1.getId() - o2.getId()))
@@ -94,10 +96,9 @@ public class RequestServiceImpl implements RequestService {
                 .orElseThrow(() -> new ResourceNotFoundException("Request not found"));
         if (!request.getState().equals(RequestState.WAITING_FOR_RETURNING))
             throw new ConflictException("Request must be waiting for returning!");
-        if(request.getRequestBy().getRole().equals(RoleName.ROLE_STAFF))
-        {
+        if(request.getRequestBy().getUser().getRole().equals(RoleName.ROLE_STAFF)) {
             SimpleMailMessage msg = new SimpleMailMessage();
-            msg.setTo(request.getAssignmentEntity().getAssignTo().getUserDetail().getEmail());
+            msg.setTo(request.getAssignmentEntity().getAssignTo().getEmail());
             msg.setSubject("Your request ");
             msg.setText("Administrator has been decline your request: " +
                     "\nRequestID: "+request.getId()+
@@ -106,6 +107,7 @@ public class RequestServiceImpl implements RequestService {
                     "\nAdministrator");
             javaMailSender.send(msg);
         }
+        request.getAssignmentEntity().setState(AssignmentState.ACCEPTED);
         requestRepository.deleteById(id);
     }
 
@@ -116,7 +118,7 @@ public class RequestServiceImpl implements RequestService {
         if (!request.getState().equals(RequestState.WAITING_FOR_RETURNING))
             throw new BadRequestException(REQUEST_STATE_INVALID_ERROR);
         request.setState(RequestState.COMPLETED);
-        request.setAcceptBy(userRepository.getByStaffCode(staffCode));
+        request.setAcceptBy(userRepository.getByStaffCode(staffCode).getUserDetail());
         request.setReturnedDate(new Date());
         requestRepository.save(request);
         AssignmentEntity assignment = request.getAssignmentEntity();
@@ -124,10 +126,10 @@ public class RequestServiceImpl implements RequestService {
         asset.setState(AssetState.AVAILABLE);
         assignment.setAssetEntity(asset);
         assignment.setState(AssignmentState.COMPLETED);
-        if(request.getRequestBy().getRole().equals(RoleName.ROLE_STAFF))
+        if(request.getRequestBy().getUser().getRole().equals(RoleName.ROLE_STAFF))
         {
             SimpleMailMessage msg = new SimpleMailMessage();
-            msg.setTo(assignment.getAssignTo().getUserDetail().getEmail());
+            msg.setTo(assignment.getAssignTo().getEmail());
             msg.setSubject("Your request ");
             msg.setText("Administrator has been accepted your request: " +
                     "\nRequestID: "+request.getId()+

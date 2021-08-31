@@ -31,11 +31,11 @@ public class RequestEntity {
 
     @ManyToOne
     @JoinColumn(name="request_by")
-    private UsersEntity requestBy;
+    private UserDetailEntity requestBy;
 
     @ManyToOne
     @JoinColumn(name="accept_by")
-    private UsersEntity acceptBy;
+    private UserDetailEntity acceptBy;
 
     @ManyToOne
     @JoinColumn(name="assignment_id")

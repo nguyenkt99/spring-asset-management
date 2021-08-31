@@ -42,7 +42,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDTO update(CategoryDTO dto) {
-        CategoryEntity category = categoryRepo.findById(dto.getId())
+        CategoryEntity category = categoryRepo.findByPrefix(dto.getPrefix())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found!"));
 
         if(!dto.getName().equalsIgnoreCase(category.getName()) && categoryRepo.existsByName(dto.getName())) {
@@ -54,14 +54,14 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void delete(Long categoryId) {
-        CategoryEntity category = categoryRepo.findById(categoryId)
+    public void delete(String prefix) {
+        CategoryEntity category = categoryRepo.findByPrefix(prefix)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found!"));
         if(category.getAssetEntities().size() > 0) {
             throw new ConflictException("Asset is available in category!");
         }
 
-        categoryRepo.deleteById(categoryId);
+        categoryRepo.deleteById(prefix);
     }
 
 }

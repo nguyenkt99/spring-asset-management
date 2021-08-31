@@ -27,7 +27,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<ReportDTO> getReport(String username) {
-        LocationEntity location = userRepository.findByUserName(username).get().getLocation();
+        LocationEntity location = userRepository.findByUserName(username).get().getUserDetail().getLocation();
         List<CategoryEntity> categories = categoryRepository.findAll();
         List<ReportDTO> reportList = new ArrayList<>();
         for(CategoryEntity category : categories) {
@@ -38,7 +38,7 @@ public class ReportServiceImpl implements ReportService {
 
     private ReportDTO getReportByCategory(CategoryEntity category, LocationEntity location) {
         ReportDTO report = new ReportDTO(category.getName(), 0, 0, 0, 0, 0, 0);
-        List<StateQuantity> stateQuantityList = assetRepository.countState(category.getId(), location.getId());
+        List<StateQuantity> stateQuantityList = assetRepository.countState(category.getPrefix(), location.getId());
 
         report.setTotal(assetRepository.countByCategoryEntityAndLocation(category, location));
         for(StateQuantity stateQuantity : stateQuantityList) {
