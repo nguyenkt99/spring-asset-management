@@ -43,7 +43,7 @@ public class RequestServiceImpl implements RequestService {
             throw new ConflictException("Assignment must have accepted state!");
         }
 
-        if (assignment.getRequests().size() > 0) {
+        if (assignment.getRequestEntity() != null) {
             throw new ConflictException("Request has already been created!");
         }
 
@@ -96,17 +96,6 @@ public class RequestServiceImpl implements RequestService {
                 .orElseThrow(() -> new ResourceNotFoundException("Request not found"));
         if (!request.getState().equals(RequestState.WAITING_FOR_RETURNING))
             throw new ConflictException("Request must be waiting for returning!");
-        if(request.getRequestBy().getUser().getRole().equals(RoleName.ROLE_STAFF)) {
-            SimpleMailMessage msg = new SimpleMailMessage();
-            msg.setTo(request.getAssignmentEntity().getAssignTo().getEmail());
-            msg.setSubject("Your request ");
-            msg.setText("Administrator has been decline your request: " +
-                    "\nRequestID: "+request.getId()+
-                    "\nAssignmentID: "+request.getAssignmentEntity().getId()+
-                    "\nKind Regards," +
-                    "\nAdministrator");
-            javaMailSender.send(msg);
-        }
         request.getAssignmentEntity().setState(AssignmentState.ACCEPTED);
         requestRepository.deleteById(id);
     }

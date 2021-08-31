@@ -37,7 +37,12 @@ public class RequestEntity {
     @JoinColumn(name="accept_by")
     private UserDetailEntity acceptBy;
 
-    @ManyToOne
-    @JoinColumn(name="assignment_id")
+//    @ManyToOne
+//    @JoinColumn(name="assignment_id")
+//    private AssignmentEntity assignmentEntity;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
+    @JoinColumn(name = "assignment_id")
     private AssignmentEntity assignmentEntity;
 }

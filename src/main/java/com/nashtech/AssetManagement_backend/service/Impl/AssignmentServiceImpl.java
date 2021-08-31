@@ -59,7 +59,9 @@ public class AssignmentServiceImpl implements AssignmentService {
         List<AssignmentState> states = new ArrayList<>();
         states.add(AssignmentState.WAITING_FOR_ACCEPTANCE);
         states.add(AssignmentState.ACCEPTED);
-//        states.add(AssignmentState.CANCELED_ASSIGN);
+        states.add(AssignmentState.WAITING_FOR_RETURNING);
+        states.add(AssignmentState.COMPLETED);
+        states.add(AssignmentState.CANCELED_ASSIGN);
         List<AssignmentDTO> assignmentDTOs = assignmentRepository.findByAssignTo_StaffCodeAndAssignedDateIsLessThanEqualAndStateIn(user.getStaffCode(), new Date(), states)
                 .stream().map(AssignmentDTO::toDTO).collect(Collectors.toList());
         assignmentDTOs.sort(Comparator.comparing(AssignmentDTO::getId));

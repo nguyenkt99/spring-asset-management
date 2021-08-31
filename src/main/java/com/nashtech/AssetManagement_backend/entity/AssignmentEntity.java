@@ -45,8 +45,11 @@ public class AssignmentEntity {
     @JoinColumn(name="assign_by")
     private UserDetailEntity assignBy;
 
-    @OneToMany(mappedBy = "assignmentEntity")
-    private List<RequestEntity> requests = new ArrayList<>();
+//    @OneToMany(mappedBy = "assignmentEntity")
+//    private List<RequestEntity> requests = new ArrayList<>();
 
+    @OneToOne(mappedBy = "assignmentEntity", fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
+    private RequestEntity requestEntity;
 }
 
