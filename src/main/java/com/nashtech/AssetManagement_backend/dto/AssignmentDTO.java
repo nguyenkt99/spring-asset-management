@@ -59,7 +59,7 @@ public class AssignmentDTO {
         dto.setAssignedDate(assign.getAssignedDate());
 //        if (assign.getState().equals(AssignmentState.COMPLETED))
         if(assign.getRequestEntity() != null)
-            dto.setReturnedDate(assign.getRequestEntity().getRequestedDate());
+            dto.setReturnedDate(assign.getRequestEntity().getReturnedDate());
         else
             dto.setReturnedDate(null);
         dto.setState(assign.getState());
