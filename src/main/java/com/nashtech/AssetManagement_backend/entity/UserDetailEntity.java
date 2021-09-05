@@ -21,13 +21,13 @@ import java.util.List;
 @Table(name = "staffs")
 public class UserDetailEntity {
     @Id
-    @Column(name = "staff_code")
+    @Column(name = "staff_code", length = 6)
     private String staffCode;
 
-    @Column(name = "first_name")
+    @Column(name = "first_name", length = 20)
     private String firstName;
 
-    @Column(name = "last_name")
+    @Column(name = "last_name", length = 100)
     private String lastName;
 
     @Enumerated(EnumType.STRING)
@@ -40,7 +40,7 @@ public class UserDetailEntity {
     @Column(name = "joined_date")
     private Date joinedDate;
 
-    @Column(name = "email")
+    @Column(name = "email", length = 100)
     private String email;
 
     @ManyToOne
@@ -49,7 +49,7 @@ public class UserDetailEntity {
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(length = 60)
+    @Column(length = 30)
     private UserState state;
 
     @OneToMany(mappedBy = "assignTo")

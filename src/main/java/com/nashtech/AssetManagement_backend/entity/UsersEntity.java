@@ -34,12 +34,12 @@ public class UsersEntity {
             strategy = "com.nashtech.AssetManagement_backend.generators.StaffCodeGenerator",
             parameters = {
                     @Parameter(name = StaffCodeGenerator.NUMBER_FORMAT_PARAMETER, value = "%04d") })
-    @Column(name = "staff_code")
+    @Column(name = "staff_code", length = 6)
     private String staffCode;
 
 
     @GeneratorType(type = UsernameGenerator.class, when = GenerationTime.INSERT)
-    @Column(name = "user_name")
+    @Column(name = "user_name", length = 20)
     private String userName;
 
     @Size(min=6, max = 100)

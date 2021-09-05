@@ -20,7 +20,7 @@ public class RequestEntity {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "state")
+    @Column(name = "state", length = 30)
     private RequestState state;
 
     @Column(name = "requested_date")

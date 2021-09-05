@@ -30,14 +30,14 @@ public class AssetEntity {
             strategy = "com.nashtech.AssetManagement_backend.generators.AssetCodeGenerator",
             parameters = {
                     @Parameter(name = AssetCodeGenerator.NUMBER_FORMAT_PARAMETER, value = "%06d")})
-    @Column(name = "asset_code")
+    @Column(name = "asset_code", length = 8)
     private String assetCode;
 
-    @Column(name = "name")
+    @Column(name = "name", length = 50)
     private String assetName;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 60,name = "state")
+    @Column(length = 30,name = "state")
     private AssetState state;
 
     @Column(name = "specification")

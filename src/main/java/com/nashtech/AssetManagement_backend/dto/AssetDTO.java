@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class AssetDTO {
     private String assetCode;
     @NotBlank(message = "asset name can not be empty")
-    @Length(max = 255)
+    @Length(max = 50)
     private String assetName;
     private AssetState state;
     private String specification;

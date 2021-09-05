@@ -24,7 +24,7 @@ public class RolesEntity {
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(length = 60)
+    @Column(length = 15)
     private RoleName name;
 
     @OneToMany(mappedBy = "role")

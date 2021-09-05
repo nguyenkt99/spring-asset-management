@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class AssignmentEntity {
     private String note;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 60,name = "state")
+    @Column(length = 30,name = "state")
     private AssignmentState state;
 
     @Column(name = "assigned_date")
