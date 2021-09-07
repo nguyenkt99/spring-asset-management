@@ -34,11 +34,17 @@ public class RequestAssignController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RequestAssignDTO> acceptRequest(@PathVariable Long id,
+    public ResponseEntity<?> acceptRequest(@PathVariable Long id,
                                                     @RequestBody RequestAssignDTO requestAssignDTO,
                                                     Authentication authentication) {
         requestAssignDTO.setId(id);
-        return ResponseEntity.ok(requestAssignService.updateState(requestAssignDTO));
+        return requestAssignService.updateState(requestAssignDTO);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> acceptRequest(@PathVariable Long id, Authentication authentication) {
+        requestAssignService.delete(id, authentication.getName());
+        return ResponseEntity.noContent().build();
     }
 
 }

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 @Getter
@@ -16,8 +17,10 @@ import java.util.Date;
 @AllArgsConstructor
 public class RequestAssignDTO {
     private Long id;
+    @NotBlank
     private String prefix;
     private String category;
+    @NotBlank
     private String note;
     private RequestAssignState state;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")

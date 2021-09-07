@@ -1,24 +1,17 @@
 package com.nashtech.AssetManagement_backend.service.Impl;
 
-import com.nashtech.AssetManagement_backend.dto.AssignmentDTO;
 import com.nashtech.AssetManagement_backend.dto.RequestAssignDTO;
 import com.nashtech.AssetManagement_backend.entity.*;
 import com.nashtech.AssetManagement_backend.exception.BadRequestException;
 import com.nashtech.AssetManagement_backend.exception.ConflictException;
 import com.nashtech.AssetManagement_backend.exception.ResourceNotFoundException;
 import com.nashtech.AssetManagement_backend.repository.*;
-import com.nashtech.AssetManagement_backend.service.AssignmentService;
 import com.nashtech.AssetManagement_backend.service.RequestAssignService;
-import com.nashtech.AssetManagement_backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,27 +50,52 @@ public class RequestAssignServiceImpl implements RequestAssignService {
 
         List<RequestAssignEntity> requestAssignEntities = new ArrayList<>();
         if(user.getUser().getRole().getName().equals(RoleName.ROLE_STAFF)) {
-            requestAssignEntities = requestAssignRepository.findAllByRequestBy_StaffCode(user.getStaffCode());
+            requestAssignEntities = requestAssignRepository.findByRequestBy_StaffCodeOrderByIdAsc(user.getStaffCode());
         } else {
-            requestAssignEntities = requestAssignRepository.findAllByRequestBy_Location(user.getLocation());
+            requestAssignEntities = requestAssignRepository.findByRequestBy_LocationOrderByIdAsc(user.getLocation());
         }
 
         return requestAssignEntities.stream().map(RequestAssignDTO::new).collect(Collectors.toList());
     }
 
     @Override
-    public RequestAssignDTO updateState(RequestAssignDTO requestAssignDTO) {
+    public ResponseEntity<?> updateState(RequestAssignDTO requestAssignDTO) {
+        if(requestAssignDTO.getState() == null) {
+            throw new BadRequestException("State is invalid!");
+        }
+
         RequestAssignEntity requestAssign = requestAssignRepository.findById(requestAssignDTO.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Request for assigning not found!"));
         if (requestAssign.getState() != RequestAssignState.WAITING_FOR_ASSIGNING)
             throw new BadRequestException("Request for assigning can be update when state is waiting for assigning!");
 
-        if(requestAssignDTO.getState().equals(RequestAssignState.DECLINED)) {
+        // if admin accept then delete this
+        if(requestAssignDTO.getState().equals(RequestAssignState.ACCEPTED)) {
+            requestAssignRepository.deleteById(requestAssignDTO.getId());
+            return ResponseEntity.noContent().build();
+        } else { // declined
             requestAssign.setNote(requestAssignDTO.getNote());
+            requestAssign.setState(requestAssignDTO.getState());
+            return ResponseEntity.ok(new RequestAssignDTO(requestAssignRepository.save(requestAssign)));
         }
+    }
 
-        requestAssign.setState(requestAssignDTO.getState());
-        return new RequestAssignDTO(requestAssignRepository.save(requestAssign));
+    @Override
+    public void delete(Long id, String username) {
+        UserDetailEntity userDetail = userRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found!")).getUserDetail();
+
+        RequestAssignEntity requestAssign = requestAssignRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Request not found"));
+
+        if(!userDetail.getUser().getRole().getName().equals(RoleName.ROLE_ADMIN)) {
+            if(!userDetail.getUser().getUserName().equals(requestAssign.getRequestBy())) {
+                throw new ConflictException("User does not own this request for assigning!");
+            }
+        }
+//        if (!requestAssign.getState().equals(RequestAssignState.WAITING_FOR_ASSIGNING))
+//            throw new ConflictException("Request must be waiting for returning!");
+        requestAssignRepository.deleteById(id);
     }
 
 }
