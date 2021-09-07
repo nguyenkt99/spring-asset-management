@@ -89,7 +89,7 @@ public class RequestAssignServiceImpl implements RequestAssignService {
                 .orElseThrow(() -> new ResourceNotFoundException("Request not found"));
 
         if(!userDetail.getUser().getRole().getName().equals(RoleName.ROLE_ADMIN)) {
-            if(!userDetail.getUser().getUserName().equals(requestAssign.getRequestBy())) {
+            if(!requestAssign.getRequestBy().getUser().getUserName().equals(username)) {
                 throw new ConflictException("User does not own this request for assigning!");
             }
         }
