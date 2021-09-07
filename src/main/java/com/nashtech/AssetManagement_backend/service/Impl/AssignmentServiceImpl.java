@@ -221,23 +221,22 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
-    public AssignmentDTO updateStateAssignment(Long assignmentId, String username, AssignmentState state) {
-        AssignmentEntity assignment = assignmentRepository.findById(assignmentId)
+    public AssignmentDTO updateStateAssignment(AssignmentDTO assignmentDTO, String username) {
+        AssignmentEntity assignment = assignmentRepository.findById(assignmentDTO.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Assignment not found!"));
         if (!assignment.getAssignTo().getUser().getUserName().equals(username))
             throw new BadRequestException("Assignment updated when it assigns you!");
         if (assignment.getState() != AssignmentState.WAITING_FOR_ACCEPTANCE)
             throw new BadRequestException("Assignment updated when state is Waiting for acceptance!");
-        if (state != AssignmentState.ACCEPTED && state != AssignmentState.CANCELED_ASSIGN)
-            throw new BadRequestException("Assignment can not be updated!");
 
         AssetEntity asset = assignment.getAssetEntity();
-        if(state == AssignmentState.CANCELED_ASSIGN) { // set asset's state is available when user decline assignment
+        if(assignmentDTO.getState() == AssignmentState.CANCELED_ASSIGN) { // set asset's state is available when user decline assignment
             asset.setState(AssetState.AVAILABLE);
+            assignment.setNote(assignmentDTO.getNote());
         }
 
+        assignment.setState(assignmentDTO.getState());
         assignment.setAssetEntity(asset);
-        assignment.setState(state);
         return AssignmentDTO.toDTO(assignmentRepository.save(assignment));
     }
 }

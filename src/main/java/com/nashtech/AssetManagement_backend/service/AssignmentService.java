@@ -15,5 +15,5 @@ public interface AssignmentService {
 
     boolean deleteAssignment(Long assignmentId, LocationEntity location);
 
-    AssignmentDTO updateStateAssignment(Long assignmentId, String username, AssignmentState state);
+    AssignmentDTO updateStateAssignment(AssignmentDTO assignmentDTO, String username);
 }

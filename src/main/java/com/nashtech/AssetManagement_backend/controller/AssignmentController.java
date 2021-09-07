@@ -78,17 +78,10 @@ public class AssignmentController {
 
     @PutMapping("/staff/{assignmentId}")
     public ResponseEntity<AssignmentDTO> changeStateStaffAssignment(@PathVariable("assignmentId") Long assignmentId
-            , @RequestParam("state") String state, Authentication authentication) {
+            , @RequestBody AssignmentDTO assignmentDTO, Authentication authentication) {
         String username = authentication.getName();
-        String accept = "accept", decline = "declined";
-        if (state.equals(accept))
-            return ResponseEntity.ok().body(assignmentService.updateStateAssignment(assignmentId, username
-                    , AssignmentState.ACCEPTED));
-        else if (state.equals(decline))
-            return ResponseEntity.ok().body(assignmentService.updateStateAssignment(assignmentId, username
-                    , AssignmentState.CANCELED_ASSIGN));
-        else
-            throw new BadRequestException("Bad Request.");
+        assignmentDTO.setId((assignmentId));
+        return ResponseEntity.ok(assignmentService.updateStateAssignment(assignmentDTO, username));
     }
 
 

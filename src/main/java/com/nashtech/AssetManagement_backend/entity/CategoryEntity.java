@@ -28,4 +28,6 @@ public class CategoryEntity {
     @OneToMany(mappedBy = "categoryEntity")
     private List<AssetEntity> assetEntities = new ArrayList<>();
 
+    @OneToMany(mappedBy = "categoryEntity")
+    private List<RequestAssignEntity> requestAssignEntities = new ArrayList<>();
 }
