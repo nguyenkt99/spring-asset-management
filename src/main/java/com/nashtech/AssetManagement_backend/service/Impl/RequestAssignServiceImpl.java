@@ -52,7 +52,7 @@ public class RequestAssignServiceImpl implements RequestAssignService {
         if(user.getUser().getRole().getName().equals(RoleName.ROLE_STAFF)) {
             requestAssignEntities = requestAssignRepository.findByRequestBy_StaffCodeOrderByIdAsc(user.getStaffCode());
         } else {
-            requestAssignEntities = requestAssignRepository.findByRequestBy_LocationOrderByIdAsc(user.getLocation());
+            requestAssignEntities = requestAssignRepository.findByRequestBy_LocationAndRequestBy_StateOrderByIdAsc(user.getLocation(), UserState.Enable);
         }
 
         return requestAssignEntities.stream().map(RequestAssignDTO::new).collect(Collectors.toList());
